@@ -50,19 +50,20 @@ class Wallet(BaseModel):
         return self.address
 
     class Meta:
-        db_table = "users_wallets"
+        db_table = "account_wallets"
 
     @classmethod
     @transaction.atomic
-    def create_user_wallet(cls, account, user_id, blockchain, network):
+    def create_user_wallet(cls, account, user_id, blockchain, network, status='active'):
         handler = CreateAddressHandler()
-        handler.create_address(
-            blockchain=blockchain, network=network, label=account.user_id
-        )
 
-        # handler.create_fake_adress(
+        # handler.create_address(
         #     blockchain=blockchain, network=network, label=account.user_id
         # )
+
+        handler.create_fake_adress(
+            blockchain=blockchain, network=network, label=account.user_id
+        )
 
         if handler._address and handler._label:
             wallet = cls.objects.create(
@@ -72,7 +73,7 @@ class Wallet(BaseModel):
                 network=network,
                 address=handler._address,
                 label=handler._label,
-                status="active",
+                status=status,
             )
 
             wallet_logo = LOGO_SETTINGS[wallet.blockchain]
@@ -111,4 +112,4 @@ class WalletAttribut(BaseModel):
         return str(self.wallet_id)
 
     class Meta:
-        db_table = "users_wallet_attributs"
+        db_table = "account_wallet_attributs"
