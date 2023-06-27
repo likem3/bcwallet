@@ -1,0 +1,21 @@
+[tool.black]
+include = '\.pyi?$'
+exclude = '''
+(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | migrations
+  | __pycache__
+  | settings
+)
+'''
+
+[build-system]
+requires = ["black"]

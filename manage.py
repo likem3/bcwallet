@@ -4,14 +4,15 @@ import os
 import sys
 from pathlib import Path
 
+
 def main():
-    env_dir = os.path.join(Path(__file__).resolve().parent, '.env')
+    env_dir = os.path.join(Path(__file__).resolve().parent, ".env")
     if not os.path.isfile(env_dir):
-        print('no .env file found')
+        print("no .env file found")
         os._exit(1)
 
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bcwallet.settings')
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bcwallet.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -23,5 +24,5 @@ def main():
     execute_from_command_line(sys.argv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
