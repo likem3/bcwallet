@@ -25,21 +25,16 @@ import os
 class SchemaGenerator(OpenAPISchemaGenerator):
   def get_schema(self, request=None, public=False):
     schema = super(SchemaGenerator, self).get_schema(request, public)
-    # schema.basePath = os.path.join(schema.basePath, 'api/')
     schema.basePath = '/'
     return schema
 
 schema_view = get_schema_view(
     openapi.Info(
-        #  add your swagger doc title
         title="bcwallet API",
-        #  version of the swagger doc
         default_version='v1',
-        # first line that appears on the top of the doc
         description="Api for account wallet",
     ),
     public=True,
-    # urlconf=".urls",
     generator_class=SchemaGenerator,
 )
 
