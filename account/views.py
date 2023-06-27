@@ -6,18 +6,19 @@ from rest_framework import status
 
 
 class UserListView(generics.ListAPIView):
-    queryset = Account.objects.filter(status='active')
+    queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
 
+
 class UserDetailByIDView(generics.RetrieveAPIView):
-    queryset = Account.objects.filter(status='active')
+    queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
 
 
 class UserDetailView(generics.RetrieveAPIView):
-    queryset = Account.objects.filter(status='active')
+    queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
-    lookup_field = 'user_id'
+    lookup_field = "user_id"
 
 
 class UserCreateView(generics.CreateAPIView):
@@ -25,7 +26,7 @@ class UserCreateView(generics.CreateAPIView):
 
 
 class UserSuspendView(generics.DestroyAPIView):
-    queryset = Account.objects.filter(status__in=['active', 'nonactive'])
+    queryset = Account.objects.filter(status__in=["active", "nonactive"])
     serializer_class = AccountSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -36,8 +37,8 @@ class UserSuspendView(generics.DestroyAPIView):
 
 
 class UserSuspendByUserIDView(generics.DestroyAPIView):
-    queryset = Account.objects.filter(status__in=['active', 'nonactive'])
-    lookup_field = 'user_id'
+    queryset = Account.objects.filter(status__in=["active", "nonactive"])
+    lookup_field = "user_id"
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -51,16 +52,16 @@ class WalletCreateView(generics.CreateAPIView):
 
 
 class WalletListView(generics.ListAPIView):
-    queryset = Wallet.objects.filter(status='active', account__status='active')
+    queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
 
 class WalletDetailView(generics.RetrieveAPIView):
-    queryset = Wallet.objects.filter(status='active', account__status='active')
+    queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
 
 class WalletListByUserIDView(generics.ListAPIView):
-    queryset = Wallet.objects.filter(status='active', account__status='active')
+    queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
     lookup_field = "account__user_id"

@@ -25,8 +25,7 @@ class AccountSerializer(serializers.ModelSerializer):
                 validated_data["username"] = self.generate_random_username()
             return Account.objects.create(uuid=uuid.uuid4(), **validated_data)
         except Exception as e:
-            raise serializers.ValidationError(f'Unable to create account, {str(e)}')
-
+            raise serializers.ValidationError(f"Unable to create account, {str(e)}")
 
     def update(self, instance, validated_data):
         # Disable updating the user_id field
@@ -48,7 +47,7 @@ class AccountSerializer(serializers.ModelSerializer):
             "id",
             "uuid",
             "user_id",
-            'email',
+            "email",
             "username",
             "status",
             "created_at",
@@ -59,7 +58,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class WalletSerializer(serializers.ModelSerializer):
     account_id = serializers.PrimaryKeyRelatedField(
-        queryset=Account.objects.filter(status='active'), source="account"
+        queryset=Account.objects.filter(status="active"), source="account"
     )
     blockchain = serializers.ChoiceField(choices=BLOCKCHAIN_OPTIONS)
     network = serializers.ChoiceField(choices=NETWORK_OPTIONS)
@@ -86,8 +85,14 @@ class WalletSerializer(serializers.ModelSerializer):
         )
 
     def validate(self, data):
-        if Wallet.objects.filter(account=data['account'], blockchain=data['blockchain'], network=data['network']).exists():
-            raise serializers.ValidationError('wallet with specific blockhain and network already created')
+        if Wallet.objects.filter(
+            account=data["account"],
+            blockchain=data["blockchain"],
+            network=data["network"],
+        ).exists():
+            raise serializers.ValidationError(
+                "wallet with specific blockhain and network already created"
+            )
         return data
 
     def create(self, validated_data):
