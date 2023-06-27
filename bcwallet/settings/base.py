@@ -20,6 +20,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'drf_yasg',
+    'drf_standardized_errors',
 
     'account',
 ]
@@ -93,8 +94,14 @@ MEDIA_ROOT = BASE_DIR / 'media'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+    ],
+    'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',
+    'DEFAULT_RENDERER_CLASSES': (
+        'utils.renderers.SuccessJsonResponse',
+    ),
 }
+
+DRF_STANDARDIZED_ERRORS = {"EXCEPTION_FORMATTER_CLASS": "utils.exceptions.MyExceptionFormatter"}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),

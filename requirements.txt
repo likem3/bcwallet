@@ -16,6 +16,7 @@ django-excel-response2==3.0.5
 django-six==1.0.5
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.2.2
+drf-standardized-errors==0.12.5
 drf-yasg==1.21.6
 excel-base==1.0.4
 flake8==6.0.0
