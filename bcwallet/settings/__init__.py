@@ -1,5 +1,6 @@
 import os
 from bcwallet.settings.base import *
+from bcwallet.settings.beat import *
 from dotenv import load_dotenv
 
 
