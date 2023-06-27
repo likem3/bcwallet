@@ -1,3 +1,8 @@
+STATUS_OPTIONS = (
+    'active', 'Active',
+    'nonactive', 'Nonactive'
+)
+
 BLOCKCHAIN_OPTIONS = (
     ('bitcoin', 'BTC'),
     ('bitcoin-cash', 'BCH'),
@@ -21,17 +26,17 @@ NETWORK_OPTIONS = (
 )
 
 LOGO_SETTINGS = {
-    'bitcoin'               : '/media/icons/btc.png',
-    'bitcoin-cash'          : '/media/icons/bitcoin-cash.png',
-    'litecoin'              : '/media/icons/litecoin.png',
-    'dogecoin'              : '/media/icons/dogecoin.png',
-    'dash'                  : '/media/icons/dash.png',
-    'ethereum'              : '/media/icons/ethereum.png',
-    'ethereum-classic'      : '/media/icons/etherum-classic.png',
-    'xrp'                   : '/media/icons/xrp.png',
-    'zcash'                 : '/media/icons/zcash.png',
-    'binance-smart-chain'   : '/media/icons/binance-smart-chain.png',
-    'tron'                  : '/media/icons/tron.png'
+    'bitcoin'               : '/storages/icons/btc.png',
+    'bitcoin-cash'          : '/storages/icons/bitcoin-cash.png',
+    'litecoin'              : '/storages/icons/litecoin.png',
+    'dogecoin'              : '/storages/icons/dogecoin.png',
+    'dash'                  : '/storages/icons/dash.png',
+    'ethereum'              : '/storages/icons/ethereum.png',
+    'ethereum-classic'      : '/storages/icons/etherum-classic.png',
+    'xrp'                   : '/storages/icons/xrp.png',
+    'zcash'                 : '/storages/icons/zcash.png',
+    'binance-smart-chain'   : '/storages/icons/binance-smart-chain.png',
+    'tron'                  : '/storages/icons/tron.png'
 }
 
 BLOCKCHAIN_CODE = {

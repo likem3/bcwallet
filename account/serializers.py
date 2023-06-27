@@ -3,16 +3,15 @@ from rest_framework import serializers
 import random
 import string
 import uuid
-from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS
-from apis.cryptoapi.address import CreateAddressHandler
+from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS, STATUS_OPTIONS
 from rest_framework.exceptions import ParseError
 
 
 class AccountSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField()
     email = serializers.EmailField()
-    username = serializers.CharField(required=False)
-    status = serializers.CharField(default="nonactive")
+    username = serializers.CharField()
+    status = serializers.ChoiceField(choices=STATUS_OPTIONS, default="active")
 
     def generate_random_username(self):
         # Generate a random username using a combination of letters and digits
@@ -21,9 +20,13 @@ class AccountSerializer(serializers.ModelSerializer):
         return "".join(random.choice(letters_digits) for _ in range(length))
 
     def create(self, validated_data):
-        if "username" not in validated_data:
-            validated_data["username"] = self.generate_random_username()
-        return Account.objects.create(uuid=uuid.uuid4(), **validated_data)
+        try:
+            if "username" not in validated_data:
+                validated_data["username"] = self.generate_random_username()
+            return Account.objects.create(uuid=uuid.uuid4(), **validated_data)
+        except Exception as e:
+            raise serializers.ValidationError(f'Unable to create account, {str(e)}')
+
 
     def update(self, instance, validated_data):
         # Disable updating the user_id field
@@ -56,7 +59,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 class WalletSerializer(serializers.ModelSerializer):
     account_id = serializers.PrimaryKeyRelatedField(
-        queryset=Account.objects.all(), source="account"
+        queryset=Account.objects.filter(status='active'), source="account"
     )
     blockchain = serializers.ChoiceField(choices=BLOCKCHAIN_OPTIONS)
     network = serializers.ChoiceField(choices=NETWORK_OPTIONS)
@@ -76,38 +79,26 @@ class WalletSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "id",
             "user_id",
-            "wallet_id",
+            "address",
             "label",
             "created_at",
             "updated_at",
         )
+
+    def validate(self, data):
+        if Wallet.objects.filter(account=data['account'], blockchain=data['blockchain'], network=data['network']).exists():
+            raise serializers.ValidationError('wallet with specific blockhain and network already created')
+        return data
 
     def create(self, validated_data):
         account = validated_data.pop("account")
         validated_data["user_id"] = account.user_id
 
         try:
-            handler = CreateAddressHandler()
-            handler.create_address(
-                blockchain=validated_data["blockchain"],
-                network=validated_data["network"],
-                label=account.user_id,
+            return Wallet.create_user_wallet(
+                account=account,
+                **validated_data,
             )
 
-            # handler.create_fake_adress(
-            #     blockchain=validated_data["blockchain"],
-            #     network=validated_data["network"],
-            #     label=account.user_id,
-            # )
-
-            if handler._address and handler._label:
-                return Wallet.objects.create(
-                    account=account,
-                    address=handler._address,
-                    label=handler._label,
-                    **validated_data,
-                )
-            else:
-                raise ParseError("create address failed")
         except Exception as e:
             raise ParseError(f"error {e}")
