@@ -2,9 +2,14 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+from pathlib import Path
 
 def main():
+    env_dir = os.path.join(Path(__file__).resolve().parent, '.env')
+    if not os.path.isfile(env_dir):
+        print('no .env file found')
+        os._exit(1)
+
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'bcwallet.settings')
     try:
