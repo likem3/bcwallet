@@ -15,15 +15,36 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from drf_yasg.generators import OpenAPISchemaGenerator
+import os
 
-from auth.views import (
-    CustomTokenObtainPairView,
-    CustomTokenRefreshView
+
+class SchemaGenerator(OpenAPISchemaGenerator):
+  def get_schema(self, request=None, public=False):
+    schema = super(SchemaGenerator, self).get_schema(request, public)
+    # schema.basePath = os.path.join(schema.basePath, 'api/')
+    schema.basePath = '/'
+    return schema
+
+schema_view = get_schema_view(
+    openapi.Info(
+        #  add your swagger doc title
+        title="bcwallet API",
+        #  version of the swagger doc
+        default_version='v1',
+        # first line that appears on the top of the doc
+        description="Api for account wallet",
+    ),
+    public=True,
+    # urlconf=".urls",
+    generator_class=SchemaGenerator,
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/', include('auth.urls')),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

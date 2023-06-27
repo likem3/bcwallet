@@ -3,6 +3,7 @@ from auth.serializers import (
     CustomTokenObtainPairSerializer,
     CustomTokenRefreshSerializer
 )
+from utils.renderers import DefaultJSONRenderer
 from rest_framework_simplejwt.views import TokenRefreshView
 
 
