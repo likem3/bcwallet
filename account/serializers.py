@@ -3,7 +3,7 @@ from rest_framework import serializers
 import random
 import string
 import uuid
-from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS
+from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS, STATUS_OPTIONS
 from apis.cryptoapi.address import CreateAddressHandler
 from rest_framework.exceptions import ParseError
 
@@ -11,8 +11,8 @@ from rest_framework.exceptions import ParseError
 class AccountSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField()
     email = serializers.EmailField()
-    username = serializers.CharField(required=False)
-    status = serializers.CharField(default="nonactive")
+    username = serializers.CharField()
+    status = serializers.ChoiceField(choices=STATUS_OPTIONS, default="active")
 
     def generate_random_username(self):
         # Generate a random username using a combination of letters and digits
@@ -21,9 +21,13 @@ class AccountSerializer(serializers.ModelSerializer):
         return "".join(random.choice(letters_digits) for _ in range(length))
 
     def create(self, validated_data):
-        if "username" not in validated_data:
-            validated_data["username"] = self.generate_random_username()
-        return Account.objects.create(uuid=uuid.uuid4(), **validated_data)
+        try:
+            if "username" not in validated_data:
+                validated_data["username"] = self.generate_random_username()
+            return Account.objects.create(uuid=uuid.uuid4(), **validated_data)
+        except Exception as e:
+            raise serializers.ValidationError(f'Unable to create account, {str(e)}')
+
 
     def update(self, instance, validated_data):
         # Disable updating the user_id field

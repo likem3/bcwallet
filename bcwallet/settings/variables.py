@@ -1,3 +1,8 @@
+STATUS_OPTIONS = (
+    'active', 'Active',
+    'nonactive', 'Nonactive'
+)
+
 BLOCKCHAIN_OPTIONS = (
     ('bitcoin', 'BTC'),
     ('bitcoin-cash', 'BCH'),
