@@ -54,7 +54,12 @@ class Wallet(BaseModel):
 
     @classmethod
     @transaction.atomic
-    def create_user_wallet(cls, account, user_id, blockchain, network, status='active'):
+    def create_user_wallet(cls, account, user_id, blockchain, network, status="active"):
+        if cls.objects.filter(
+            account=account, user_id=user_id, blockchain=blockchain, network=network
+        ).exists():
+            return
+
         handler = CreateAddressHandler()
 
         # handler.create_address(

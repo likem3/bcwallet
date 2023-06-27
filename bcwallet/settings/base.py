@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'drf_standardized_errors',
 
     'account',
+    'recharge',
 ]
 
 MIDDLEWARE = [
