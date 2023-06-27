@@ -16,12 +16,12 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Customize the token response format
         custom_response = {
-            'code': 200,
-            'status': True,
-            'data': {
-                'access_token': data['access'],
-                'refresh_token': data['refresh'],
-            }
+            "code": 200,
+            "status": True,
+            "data": {
+                "access_token": data["access"],
+                "refresh_token": data["refresh"],
+            },
         }
 
         return custom_response
@@ -29,17 +29,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
-        refresh = RefreshToken(attrs['refresh'])
+        refresh = RefreshToken(attrs["refresh"])
         data = {
-            'access_token': str(refresh.access_token),
-            'refresh_token': str(refresh),
+            "access_token": str(refresh.access_token),
+            "refresh_token": str(refresh),
         }
 
         # Customize the token response format
         custom_response = {
-            'code': 200,
-            'status': True,
-            'data': data,
+            "code": 200,
+            "status": True,
+            "data": data,
         }
 
         return custom_response
