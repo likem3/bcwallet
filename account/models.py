@@ -118,3 +118,20 @@ class WalletAttribut(BaseModel):
 
     class Meta:
         db_table = "account_wallet_attributs"
+
+
+class WalletBalance(BaseModel):
+    wallet = models.OneToOneField(
+        Wallet, on_delete=models.CASCADE, related_name="balance", null=True, blank=True
+    )
+    amount = models.DecimalField(
+        max_digits=25, decimal_places=10, null=True, blank=True
+    )
+    unit = models.CharField(max_length=10, null=True, blank=True)
+    created_timestamp = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return str(self.id)
+
+    class Meta:
+        db_table = "account_wallet_balance"
