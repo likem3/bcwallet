@@ -16,7 +16,6 @@ class DepositWalletSerializer(serializers.ModelSerializer):
     blockchain = serializers.ChoiceField(choices=BLOCKCHAIN_OPTIONS)
     network = serializers.ChoiceField(choices=NETWORK_OPTIONS)
     attributs = serializers.SerializerMethodField()
-    
 
     class Meta:
         model = AccountWallet
@@ -29,9 +28,17 @@ class DepositWalletSerializer(serializers.ModelSerializer):
             "address",
             "label",
             "status",
-            "attributs"
+            "attributs",
         ]
-        read_only_fields = ["id", "user_id", "account", "address", "label", "status", "attributs"]
+        read_only_fields = [
+            "id",
+            "user_id",
+            "account",
+            "address",
+            "label",
+            "status",
+            "attributs",
+        ]
 
     def get_attributs(self, obj):
         attributs_data = WalletAttributSerializer(obj.attributs).data
@@ -39,7 +46,7 @@ class DepositWalletSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         try:
-            account = Account.objects.get(user_id=validated_data['user_id'])
+            account = Account.objects.get(user_id=validated_data["user_id"])
 
             blockchain = validated_data["blockchain"]
             network = validated_data["network"]

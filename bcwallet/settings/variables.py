@@ -63,6 +63,47 @@ NETWORK_CODE = {
 
 BLOCKCHAIN_NETWORK_MAP = {
     'bitcoin': {
-        'production': 'mainnet'
-    }
+        'production': 'mainnet',
+        'development': 'testnet'
+    },               
+    'bitcoin-cash' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'litecoin' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'dogecoin' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'dash' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'ethereum' : {
+        'production': 'mainnet',
+        'development': 'goerli'
+    },
+    'ethereum-classic' : {
+        'production': 'mainnet',
+        'development': 'mordor'
+    },
+    'xrp' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'zcash' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'binance-smart-chain' : {
+        'production': 'mainnet',
+        'development': 'testnet'
+    },
+    'tron' : {
+        'production': 'mainnet',
+        'development': 'nile'
+    },
 }
