@@ -7,8 +7,12 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
 CELERY_BEAT_SCHEDULE = {
-    'generate_random_number': {
-        'task': 'account.tasks.generate_random_number',
-        'schedule': 20,
-    },
+    # 'generate_random_number': {
+    #     'task': 'account.tasks.generate_random_number',
+    #     'schedule': 20,
+    # },
+    'get_wallets_balances': {
+        'task': 'account.tasks.get_wallets_balances',
+        'schedule': 60,
+    }
 }
