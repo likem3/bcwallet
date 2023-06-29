@@ -10,13 +10,19 @@ from bcwallet.settings import (
     ENVIRONMENT_SETTING,
     NETWORK_CODE,
     BLOCKCHAIN_CODE,
+    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
 )
-
+from decimal import Decimal
 
 def handle_blockchain_network(blockchain):
     if ENVIRONMENT_SETTING == "production":
         return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["production"]
     return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
+
+def handle_minimum_deposit_amount(blockchain):
+    if ENVIRONMENT_SETTING == "production":
+        return BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[blockchain]
+    return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[blockchain]) / 10
 
 
 def handle_transaction_code(blockchain, network, user_id, transaction_type="DP"):

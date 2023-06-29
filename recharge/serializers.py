@@ -1,9 +1,14 @@
 from rest_framework import serializers
 from account.models import Account, Wallet as AccountWallet, WalletAttribut
-from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS
+from bcwallet.settings import (
+    BLOCKCHAIN_OPTIONS,
+    NETWORK_OPTIONS,
+    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP
+)
 from rest_framework.exceptions import APIException
 from recharge.models import Transaction
-from utils.handlers import handle_blockchain_network
+from utils.handlers import handle_blockchain_network, handle_minimum_deposit_amount
+from decimal import Decimal
 
 
 class WalletAttributSerializer(serializers.ModelSerializer):
@@ -131,6 +136,31 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
             "cancelled_by",
             "deleted_by",
         ]
+
+    def validate(self, attrs):
+        # Call the parent's validate() method first
+        attrs = super().validate(attrs)
+
+        user_id = attrs['user_id']
+        amount = attrs['amount']
+        blockchain, network = handle_blockchain_network(attrs['blockchain'])
+
+        if not Account.objects.filter(status="active", user_id=user_id).exists():
+            raise serializers.ValidationError("Invalid user id")
+        
+        minimum_amount = Decimal(handle_minimum_deposit_amount(blockchain))
+        if Decimal(amount) <= minimum_amount:
+            raise serializers.ValidationError(f"deposit amount too small, minimum amount is {minimum_amount}")
+
+        if Transaction.objects.filter(
+            account__user_id=user_id,
+            blockchain=blockchain,
+            network=network,
+            status='pending'
+        ).exists():
+            raise serializers.ValidationError('User still has pending transaction')
+
+        return attrs
 
     def get_detail(self, obj):
         attributs_data = WalletAttributSerializer(obj.wallet.attributs).data

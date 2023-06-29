@@ -107,3 +107,17 @@ BLOCKCHAIN_NETWORK_MAP = {
         'development': 'nile'
     },
 }
+
+BLOCKCHAIN_MINIMUM_DEPOSIT_MAP = {
+    'bitcoin' : '0.0001',
+    'bitcoin-cash' : '0.01',
+    'litecoin' : '0.01',
+    'dogecoin' : '20.00',
+    'dash' : '0.1',
+    'ethereum' : '0.001',
+    'ethereum-classic' : '0.1',
+    'xrp' : '4.00',
+    'zcash' : '0.1',
+    'binance-smart-chain' : '0.01',
+    'tron' : '0.01',
+}

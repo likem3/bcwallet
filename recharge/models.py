@@ -26,6 +26,7 @@ class Transaction(ExtraBaseModel):
     to_address = models.CharField(max_length=100, null=True, blank=True)
     from_currency = models.CharField(max_length=50, null=True, blank=True)
     to_currency = models.CharField(max_length=50, null=True, blank=True)
+    blockchain = models.CharField(max_length=30, null=True, blank=True)
     network = models.CharField(max_length=30, null=True, blank=True)
     amount = models.DecimalField(
         max_digits=25, decimal_places=10, blank=True, null=True
@@ -55,6 +56,7 @@ class Transaction(ExtraBaseModel):
             network=network,
             amount=amount,
             expired_at=(timezone.now() + timedelta(minutes=30)),
+            blockchain=blockchain,
         )
 
         return trx

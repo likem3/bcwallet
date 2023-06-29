@@ -1,4 +1,4 @@
-from account.models import Account, Wallet
+from account.models import Account, Wallet, WalletAttribut, WalletBalance
 from rest_framework import serializers
 import random
 import string
@@ -56,12 +56,34 @@ class AccountSerializer(serializers.ModelSerializer):
         read_only_fields = ("uuid", "id", "created_at", "updated_at")
 
 
+class WalletAttributSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WalletAttribut
+        fields = [
+            'address_qr',
+            'symbol',
+            'logo',
+        ]
+
+
+class WalletBalanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WalletBalance
+        fields = [
+            'amount',
+            'unit',
+            'updated_at',
+        ]
+
+
 class WalletSerializer(serializers.ModelSerializer):
     account_id = serializers.PrimaryKeyRelatedField(
         queryset=Account.objects.filter(status="active"), source="account"
     )
     blockchain = serializers.ChoiceField(choices=BLOCKCHAIN_OPTIONS)
     network = serializers.ChoiceField(choices=NETWORK_OPTIONS)
+    attributs = WalletAttributSerializer(read_only=True)
+    balance = WalletBalanceSerializer(read_only=True)
 
     class Meta:
         model = Wallet
@@ -74,6 +96,8 @@ class WalletSerializer(serializers.ModelSerializer):
             "address",
             "label",
             "status",
+            "attributs",
+            "balance",
         )
         read_only_fields = (
             "id",
@@ -82,6 +106,8 @@ class WalletSerializer(serializers.ModelSerializer):
             "label",
             "created_at",
             "updated_at",
+            "attributs",
+            "balance",
         )
 
     def validate(self, data):

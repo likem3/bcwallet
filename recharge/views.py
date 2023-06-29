@@ -12,14 +12,8 @@ class InitiateTransactionView(generics.CreateAPIView):
 
 
 class CreateDepositTransactionView(generics.CreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     serializer_class = DepositTransactionSerializer
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
-
-    # def get_serializer_context(self):
-    #     context = super().get_serializer_context()
-    #     account = get_object_or_404(Account, user_id=self.kwargs.get("user_id"))
-    #     context["account"] = account
-    #     return context
