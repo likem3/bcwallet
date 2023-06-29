@@ -4,19 +4,27 @@ import os
 from io import BytesIO
 import time
 from PIL import Image
-from bcwallet.settings import BASE_DIR, BLOCKCHAIN_NETWORK_MAP, ENVIRONMENT_SETTING, NETWORK_CODE, BLOCKCHAIN_CODE
+from bcwallet.settings import (
+    BASE_DIR,
+    BLOCKCHAIN_NETWORK_MAP,
+    ENVIRONMENT_SETTING,
+    NETWORK_CODE,
+    BLOCKCHAIN_CODE,
+)
 
 
 def handle_blockchain_network(blockchain):
-    if ENVIRONMENT_SETTING == 'production':
-        return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]['production']
-    return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]['development']
+    if ENVIRONMENT_SETTING == "production":
+        return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["production"]
+    return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
 
-def handle_transaction_code(blockchain, network, user_id, transaction_type='DP'):
+
+def handle_transaction_code(blockchain, network, user_id, transaction_type="DP"):
     user_id = str(user_id).zfill(8)
     ncode = NETWORK_CODE[network]
     bcode = BLOCKCHAIN_CODE[blockchain]
-    return f'{transaction_type}{bcode}{ncode}-{user_id}-{int(time.time())}'
+    return f"{transaction_type}{bcode}{ncode}-{user_id}-{int(time.time())}"
+
 
 def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):
     qr = qrcode.QRCode(

@@ -1,3 +1,5 @@
-# from django.contrib import admin
+from django.contrib import admin
+from recharge.models import Transaction
 
-# Register your models here.
+
+admin.site.register(Transaction)

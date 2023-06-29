@@ -114,7 +114,7 @@ class WalletAttribut(BaseModel):
     logo = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.wallet_id)
+        return str(self.wallet.address)
 
     class Meta:
         db_table = "account_wallet_attributs"
@@ -131,7 +131,7 @@ class WalletBalance(BaseModel):
     created_timestamp = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.wallet.address)
 
     class Meta:
         db_table = "account_wallet_balance"

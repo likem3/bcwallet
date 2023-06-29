@@ -7,6 +7,14 @@ urlpatterns = [
         InitiateTransactionView.as_view(),
         name="get-deposit-wallet",
     ),
-    path("transaction/deposit/", CreateDepositTransactionView.as_view(), name='create-deposit-transaction'),
-    path("transaction/withdrawal/", CreateDepositTransactionView.as_view(), name='create-withdrawal-transaction'),
+    path(
+        "transaction/deposit/",
+        CreateDepositTransactionView.as_view(),
+        name="create-deposit-transaction",
+    ),
+    path(
+        "transaction/withdrawal/",
+        CreateDepositTransactionView.as_view(),
+        name="create-withdrawal-transaction",
+    ),
 ]

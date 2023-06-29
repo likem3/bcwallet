@@ -9,7 +9,7 @@ class InitiateTransactionView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
-    
+
 
 class CreateDepositTransactionView(generics.CreateAPIView):
     # permission_classes = [IsAuthenticated]

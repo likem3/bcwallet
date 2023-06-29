@@ -2,7 +2,6 @@ from rest_framework import serializers
 from account.models import Account, Wallet as AccountWallet, WalletAttribut
 from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS
 from rest_framework.exceptions import APIException
-from django.shortcuts import get_object_or_404
 from recharge.models import Transaction
 from utils.handlers import handle_blockchain_network
 
@@ -83,54 +82,54 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = [
-            'id',
-            'deleted_at',
-            'code',
-            'origin_code',
-            'account',
-            'wallet',
-            'from_address',
-            'to_address',
-            'from_currency',
-            'to_currency',
-            'network',
-            'rate',
-            'status',
-            'cancel_reason',
-            'proof_of_payment',
-            'expired_at',
-            'receipt_id',
-            'created_by',
-            'approved_by',
-            'cancelled_by',
-            'deleted_by',
-            'amount',
-            'blockchain',
-            'user_id',
-            'detail',
+            "id",
+            "deleted_at",
+            "code",
+            "origin_code",
+            "account",
+            "wallet",
+            "from_address",
+            "to_address",
+            "from_currency",
+            "to_currency",
+            "network",
+            "rate",
+            "status",
+            "cancel_reason",
+            "proof_of_payment",
+            "expired_at",
+            "receipt_id",
+            "created_by",
+            "approved_by",
+            "cancelled_by",
+            "deleted_by",
+            "amount",
+            "blockchain",
+            "user_id",
+            "detail",
         ]
         read_only_fields = [
-            'id',
-            'deleted_at',
-            'code',
-            'origin_code',
-            'account',
-            'wallet',
-            'from_address',
-            'to_address',
-            'from_currency',
-            'to_currency',
-            'network',
-            'rate',
-            'status',
-            'cancel_reason',
-            'proof_of_payment',
-            'expired_at',
-            'receipt_id',
-            'created_by',
-            'approved_by',
-            'cancelled_by',
-            'deleted_by',
+            "id",
+            "deleted_at",
+            "code",
+            "origin_code",
+            "account",
+            "wallet",
+            "from_address",
+            "to_address",
+            "from_currency",
+            "to_currency",
+            "network",
+            "rate",
+            "status",
+            "cancel_reason",
+            "proof_of_payment",
+            "expired_at",
+            "receipt_id",
+            "created_by",
+            "approved_by",
+            "cancelled_by",
+            "deleted_by",
         ]
 
     def get_detail(self, obj):
@@ -141,7 +140,9 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         try:
             account = Account.objects.get(user_id=validated_data["user_id"])
 
-            blockchain, network = handle_blockchain_network(validated_data["blockchain"])
+            blockchain, network = handle_blockchain_network(
+                validated_data["blockchain"]
+            )
 
             account_wallet = AccountWallet.objects.get(
                 account=account, blockchain=blockchain, network=network
@@ -162,7 +163,7 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
             raise APIException("Failed to create account wallet.", code="server_error")
 
         transaction = Transaction.create_deposit_transaction(
-            account,account_wallet, blockchain, network, validated_data['amount']
+            account, account_wallet, blockchain, network, validated_data["amount"]
         )
 
         return transaction

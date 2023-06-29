@@ -23,6 +23,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('jet/', include('jet.urls', 'jet')),
     path("admin/", admin.site.urls),
     path("auth/", include("auth.urls")),
     path("", include("account.urls")),
