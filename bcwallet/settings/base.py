@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'drf_standardized_errors',
+    'django_filters',
 
     'account',
     'recharge',

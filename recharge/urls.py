@@ -1,16 +1,15 @@
 from django.urls import path
 from recharge.views import (
-    InitiateTransactionView,
+    DepositRechargeView,
     CreateDepositTransactionView,
     TransactionListByUserIDView,
     TransactionDetailByUserIDView,
-    # UpdateReceiptIdDepositTransactionView
 )
 
 urlpatterns = [
     path(
         "recharge/wallet/",
-        InitiateTransactionView.as_view(),
+        DepositRechargeView.as_view(),
         name="get-deposit-wallet",
     ),
     path(

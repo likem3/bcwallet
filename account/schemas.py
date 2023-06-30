@@ -6,6 +6,7 @@ from rest_framework import status
 create_wallet_schema = {
     "request_body": openapi.Schema(
         type=openapi.TYPE_OBJECT,
+        required=["user_id", "blockchain"],
         properties={
             "user_id": openapi.Schema(
                 type=openapi.TYPE_INTEGER, description=HELPER_TEXT["user_id"]

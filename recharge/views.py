@@ -1,19 +1,15 @@
 from recharge.serializers import (
-    DepositWalletSerializer,
     DepositTransactionSerializer,
     UpdateReceiptTransactionSerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
 from recharge.models import Transaction
+from account.views import WalletListCreateView
 
 
-class InitiateTransactionView(generics.CreateAPIView):
-    # permission_classes = [IsAuthenticated]
-    serializer_class = DepositWalletSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
+class DepositRechargeView(WalletListCreateView):
+    allowed_methods = ['POST']
 
 
 class CreateDepositTransactionView(generics.CreateAPIView):

@@ -4,7 +4,7 @@ from account.models import Account, Wallet
 from utils.handlers import handle_transaction_code
 from django.utils import timezone
 from datetime import timedelta
-from bcwallet.settings import TRANSACTION_STATUS
+from bcwallet.settings import TRANSACTION_STATUS, HELPER_TEXT
 
 
 class Transaction(ExtraBaseModel):
@@ -13,92 +13,91 @@ class Transaction(ExtraBaseModel):
     code = models.CharField(
         max_length=255,
         unique=True,
-        help_text="Code of the transaction, also serves as the transaction identifier",
+        help_text=HELPER_TEXT["trx_code"],
     )
     origin_code = models.CharField(
         max_length=255,
         blank=True,
         null=True,
-        help_text="Origin transaction if the transaction \
-            is derived from another transaction",
+        help_text=HELPER_TEXT["trx_origin_code"],
     )
     account = models.ForeignKey(
         to=Account,
         on_delete=models.CASCADE,
         related_name="account_transactions",
-        help_text="Related data of the account performing the transaction",
+        help_text=HELPER_TEXT["account"],
     )
     wallet = models.ForeignKey(
         to=Wallet,
         on_delete=models.CASCADE,
         related_name="wallet_transactions",
-        help_text="Related data of the wallet performing the transaction",
+        help_text=HELPER_TEXT["wallet"],
     )
     from_address = models.CharField(
         max_length=100,
         null=True,
         blank=True,
-        help_text="Currency address that sends in the transaction",
+        help_text=HELPER_TEXT["trx_from_address"],
     )
     to_address = models.CharField(
         max_length=100,
         null=True,
         blank=True,
-        help_text="Currency address that receives in the transaction",
+        help_text=HELPER_TEXT["trx_to_address"],
     )
     from_currency = models.CharField(
         max_length=50,
         null=True,
         blank=True,
-        help_text="Symbol of the source currency such as BTC, ETH, etc",
+        help_text=HELPER_TEXT["trx_from_currency"],
     )
     to_currency = models.CharField(
         max_length=50,
         null=True,
         blank=True,
-        help_text="Symbol of the target currency such as BTC, ETH, etc",
+        help_text=HELPER_TEXT["trx_to_currency"],
     )
     blockchain = models.CharField(
-        max_length=30, null=True, blank=True, help_text="Main blockchain name used"
+        max_length=30, null=True, blank=True, help_text=HELPER_TEXT["blockchain"]
     )
     network = models.CharField(
-        max_length=30, null=True, blank=True, help_text="Transaction network name used"
+        max_length=30, null=True, blank=True, help_text=HELPER_TEXT["network"]
     )
     amount = models.DecimalField(
         max_digits=25,
         decimal_places=10,
         blank=True,
         null=True,
-        help_text="Separated by a dot, the amount to be received (e.g., 0.001)",
+        help_text=HELPER_TEXT["trx_amount"],
     )
     rate = models.DecimalField(
         max_digits=25,
         decimal_places=10,
         blank=True,
         null=True,
-        help_text="Separated by a dot, exchange rate if different currencies",
+        help_text=HELPER_TEXT["trx_rate"],
     )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
         default="pending",
-        help_text="Transaction status",
+        help_text=HELPER_TEXT["trx_status"],
     )
     cancel_reason = models.TextField(
-        null=True, blank=True, help_text="Reason why the transaction becomes canceled"
+        null=True, blank=True, help_text=HELPER_TEXT["trx_cancel_reason"]
     )
     proof_of_payment = models.TextField(
         blank=True,
         null=True,
-        help_text="Image in base64 format of the transaction receipt",
+        help_text=HELPER_TEXT["trx_proof_of_payment"],
     )
     expired_at = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="The expiration of the transaction before it gets ignored",
+        help_text=HELPER_TEXT["trx_expired_at"],
     )
     receipt_id = models.CharField(
-        max_length=255, null=True, blank=True, help_text="The transaction hash (txid)"
+        max_length=255, null=True, blank=True, help_text=HELPER_TEXT["trx_receipt_id"]
     )
 
     def __str__(self):
