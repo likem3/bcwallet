@@ -59,6 +59,6 @@ class WalletListByUserIDView(generics.ListAPIView):
     # permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
-    
+
     def get_queryset(self):
-        return self.queryset.filter(account__user_id=self.kwargs.pop('user_id'))
+        return self.queryset.filter(account__user_id=self.kwargs.pop("user_id"))

@@ -3,8 +3,8 @@ from django.urls import path, include
 from bcwallet.swagger import schema_view
 
 urlpatterns = [
-    path('jet/', include('jet.urls', 'jet')),
-    path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
+    path("jet/", include("jet.urls", "jet")),
+    path("jet/dashboard/", include("jet.dashboard.urls", "jet-dashboard")),
     path("admin/", admin.site.urls),
     path("auth/", include("auth.urls")),
     path("", include("account.urls")),

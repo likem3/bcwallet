@@ -1,6 +1,12 @@
-STATUS_OPTIONS = (
+STATUS_OPTIONS_SERIALIZER = (
     'active', 'Active',
     'nonactive', 'Nonactive'
+)
+
+STATUS_CHOICES_MODEL = (
+    ("active", "Active"),
+    ("nonactive", "Non-active"),
+    ("suspended", "Suspended"),
 )
 
 BLOCKCHAIN_OPTIONS = (
@@ -120,4 +126,39 @@ BLOCKCHAIN_MINIMUM_DEPOSIT_MAP = {
     'zcash' : '0.1',
     'binance-smart-chain' : '0.01',
     'tron' : '0.01',
+}
+
+TRANSACTION_STATUS = (
+    ("pending", "Pending"),
+    ("confirming", "Confirming"),
+    ("completed", "Completed"),
+    ("failed", "Failed"),
+    ("cancelled", "Cancelled"),
+)
+
+NETWORK_RULE = """
+Network rule:
+In a production env network value "mainnet" for all blockchain.
+Else, "ethereum" use "goerli", "ethereum-classic" use "mordor",
+"tron" use "nile", rest use "testnet".
+"""
+
+HELPER_TEXT = {
+    "account_uuid": "Unique UUID of the registered user",
+    "account_user_id": "User ID of the registered user",
+    "account_email": "Email of the registered user",
+    "account_username": "Username of the registered user",
+    "user_id": "ID of the associated user (source: account.user_id)",
+    "blockchain": "Related blockchain that will be used",
+    "network": f"Blockchain network \n{NETWORK_RULE}",
+    "account": "Related account object",
+    "wallet": "Related wallet object",
+    "address": "String address of the blockchain wallet",
+    "wallet_label": "Label of the wallet",
+    "address_qr": "Base64 representation of the wallet address",
+    "wallet_symbol": "Wallet blockchain symbol (e.g., ETH, BTC, etc.)",
+    "wallet_logo": "URL path to the wallet blockchain logo",
+    "wallet_balance_amount": "Nominal amount in the wallet",
+    "wallet_balance_unit": "Symbol of the wallet currency",
+    "created_timestamp": "Timestamp of when the remote wallet was created",
 }

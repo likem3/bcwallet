@@ -1,14 +1,6 @@
 from account.models import Account, Wallet, WalletAttribut, WalletBalance
 from rest_framework import serializers
-import random
-import string
 import uuid
-from bcwallet.settings import (
-    BLOCKCHAIN_OPTIONS,
-    NETWORK_OPTIONS,
-    STATUS_OPTIONS_SERIALIZER,
-    HELPER_TEXT,
-)
 from rest_framework.exceptions import ParseError
 from utils.handlers import handle_blockchain_network
 
@@ -73,12 +65,12 @@ class WalletSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         breakpoint()
-        blockchain, network = handle_blockchain_network(data['blockchain'])
+        blockchain, network = handle_blockchain_network(data["blockchain"])
 
-        if not Account.objects.filter(user_id=data['user_id'], status='active').exists():
-            raise serializers.ValidationError(
-                "invalid user id"
-            )
+        if not Account.objects.filter(
+            user_id=data["user_id"], status="active"
+        ).exists():
+            raise serializers.ValidationError("invalid user id")
 
         if Wallet.objects.filter(
             user_id=data["user_id"],
@@ -91,11 +83,8 @@ class WalletSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        account = Account.objects.get(
-            user_id=validated_data['user_id']
-        )
-        _, network = handle_blockchain_network(validated_data['blockchain'])
-
+        account = Account.objects.get(user_id=validated_data["user_id"])
+        _, network = handle_blockchain_network(validated_data["blockchain"])
 
         try:
             return Wallet.create_user_wallet(

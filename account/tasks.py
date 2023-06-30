@@ -61,7 +61,8 @@ def get_wallets_balances():
         ).exists():
             continue
 
-        url = f"{CRYPTOAPI_BASE_URL}/wallet-as-a-service/wallets/{CRYPTOAPI_MASTER_WALLET}/{blockchain}/{network}/addresses"
+        url = f"{CRYPTOAPI_BASE_URL}/wallet-as-a-service/wallets/ \
+            {CRYPTOAPI_MASTER_WALLET}/{blockchain}/{network}/addresses"
         limit = 50
         offset = 0
 

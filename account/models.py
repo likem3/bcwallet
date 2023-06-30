@@ -6,7 +6,7 @@ from bcwallet.settings import (
     LOGO_SETTINGS,
     BLOCKCHAIN_CODE,
     STATUS_CHOICES_MODEL,
-    HELPER_TEXT
+    HELPER_TEXT,
 )
 from django.db import transaction
 
@@ -15,7 +15,9 @@ class Account(BaseModel):
     uuid = models.UUIDField(
         unique=True, editable=False, help_text=HELPER_TEXT["account_uuid"]
     )
-    user_id = models.PositiveIntegerField(unique=True, help_text=HELPER_TEXT["account_user_id"])
+    user_id = models.PositiveIntegerField(
+        unique=True, help_text=HELPER_TEXT["account_user_id"]
+    )
     email = models.EmailField(
         unique=True, max_length=100, help_text=HELPER_TEXT["account_email"]
     )
@@ -38,15 +40,25 @@ class Account(BaseModel):
 
 class Wallet(BaseModel):
     account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="wallets", help_text=HELPER_TEXT['account']
+        Account,
+        on_delete=models.CASCADE,
+        related_name="wallets",
+        help_text=HELPER_TEXT["account"],
     )
-    user_id = models.PositiveIntegerField(help_text=HELPER_TEXT['user_id'])
+    user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
     blockchain = models.CharField(max_length=50, help_text=HELPER_TEXT["blockchain"])
     network = models.CharField(max_length=20, help_text=HELPER_TEXT["network"])
-    address = models.CharField(unique=True, max_length=255, help_text=HELPER_TEXT['address'])
-    label = models.CharField(unique=True, max_length=255, help_text=HELPER_TEXT['wallet_label'])
+    address = models.CharField(
+        unique=True, max_length=255, help_text=HELPER_TEXT["address"]
+    )
+    label = models.CharField(
+        unique=True, max_length=255, help_text=HELPER_TEXT["wallet_label"]
+    )
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES_MODEL, default="nonactive", help_text="status of the wallet"
+        max_length=20,
+        choices=STATUS_CHOICES_MODEL,
+        default="nonactive",
+        help_text="status of the wallet",
     )
 
     def __str__(self):
@@ -106,10 +118,17 @@ class Wallet(BaseModel):
 
 class WalletAttribut(BaseModel):
     wallet = models.OneToOneField(
-        Wallet, on_delete=models.CASCADE, related_name="attributs", help_text=HELPER_TEXT["wallet"]
+        Wallet,
+        on_delete=models.CASCADE,
+        related_name="attributs",
+        help_text=HELPER_TEXT["wallet"],
     )
-    address_qr = models.TextField(null=True, blank=True, help_text=HELPER_TEXT["address_qr"])
-    symbol = models.CharField(max_length=5, null=True, blank=True, help_text=HELPER_TEXT["wallet_symbol"])
+    address_qr = models.TextField(
+        null=True, blank=True, help_text=HELPER_TEXT["address_qr"]
+    )
+    symbol = models.CharField(
+        max_length=5, null=True, blank=True, help_text=HELPER_TEXT["wallet_symbol"]
+    )
     logo = models.TextField(null=True, blank=True, help_text=HELPER_TEXT["wallet_logo"])
 
     def __str__(self):
@@ -121,13 +140,29 @@ class WalletAttribut(BaseModel):
 
 class WalletBalance(BaseModel):
     wallet = models.OneToOneField(
-        Wallet, on_delete=models.CASCADE, related_name="balance", null=True, blank=True, help_text=HELPER_TEXT["wallet"]
+        Wallet,
+        on_delete=models.CASCADE,
+        related_name="balance",
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["wallet"],
     )
     amount = models.DecimalField(
-        max_digits=25, decimal_places=10, null=True, blank=True, help_text=HELPER_TEXT["wallet_balance_amount"]
+        max_digits=25,
+        decimal_places=10,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["wallet_balance_amount"],
     )
-    unit = models.CharField(max_length=10, null=True, blank=True, help_text=HELPER_TEXT["wallet_balance_unit"])
-    created_timestamp = models.DateTimeField(null=True, blank=True, help_text=HELPER_TEXT["created_timestamp"])
+    unit = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["wallet_balance_unit"],
+    )
+    created_timestamp = models.DateTimeField(
+        null=True, blank=True, help_text=HELPER_TEXT["created_timestamp"]
+    )
 
     def __str__(self):
         return str(self.wallet.address)

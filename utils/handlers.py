@@ -14,10 +14,12 @@ from bcwallet.settings import (
 )
 from decimal import Decimal
 
+
 def handle_blockchain_network(blockchain):
     if ENVIRONMENT_SETTING == "production":
         return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["production"]
     return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
+
 
 def handle_minimum_deposit_amount(blockchain):
     if ENVIRONMENT_SETTING == "production":

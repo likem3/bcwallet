@@ -1,10 +1,6 @@
 from rest_framework import serializers
 from account.models import Account, Wallet as AccountWallet, WalletAttribut
-from bcwallet.settings import (
-    BLOCKCHAIN_OPTIONS,
-    NETWORK_OPTIONS,
-    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP
-)
+from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS
 from rest_framework.exceptions import APIException
 from recharge.models import Transaction
 from utils.handlers import handle_blockchain_network, handle_minimum_deposit_amount
@@ -87,7 +83,6 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Transaction
         fields = [
-            "id",
             "deleted_at",
             "code",
             "origin_code",
@@ -141,24 +136,26 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         # Call the parent's validate() method first
         attrs = super().validate(attrs)
 
-        user_id = attrs['user_id']
-        amount = attrs['amount']
-        blockchain, network = handle_blockchain_network(attrs['blockchain'])
+        user_id = attrs["user_id"]
+        amount = attrs["amount"]
+        blockchain, network = handle_blockchain_network(attrs["blockchain"])
 
         if not Account.objects.filter(status="active", user_id=user_id).exists():
             raise serializers.ValidationError("Invalid user id")
-        
+
         minimum_amount = Decimal(handle_minimum_deposit_amount(blockchain))
         if Decimal(amount) <= minimum_amount:
-            raise serializers.ValidationError(f"deposit amount too small, minimum amount is {minimum_amount}")
+            raise serializers.ValidationError(
+                f"deposit amount too small, minimum amount is {minimum_amount}"
+            )
 
         if Transaction.objects.filter(
             account__user_id=user_id,
             blockchain=blockchain,
             network=network,
-            status='pending'
+            status="pending",
         ).exists():
-            raise serializers.ValidationError('User still has pending transaction')
+            raise serializers.ValidationError("User still has pending transaction")
 
         return attrs
 
@@ -197,3 +194,10 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         )
 
         return transaction
+
+
+class UpdateReceiptTransactionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction
+        fields = Transaction.get_fields()
+        read_only_fields = Transaction.get_fields(excludes=["receipt_id"])
