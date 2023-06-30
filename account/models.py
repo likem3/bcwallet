@@ -2,23 +2,31 @@ from django.db import models
 from utils.models import BaseModel
 from apis.cryptoapi.address import CreateAddressHandler
 from utils.handlers import generate_qrcode_with_logo
-from bcwallet.settings import LOGO_SETTINGS, BLOCKCHAIN_CODE
+from bcwallet.settings import (
+    LOGO_SETTINGS,
+    BLOCKCHAIN_CODE,
+    STATUS_CHOICES_MODEL,
+    HELPER_TEXT
+)
 from django.db import transaction
 
 
 class Account(BaseModel):
-    STATUS_CHOICES = (
-        ("active", "Active"),
-        ("nonactive", "Non-active"),
-        ("suspended", "Suspended"),
+    uuid = models.UUIDField(
+        unique=True, editable=False, help_text=HELPER_TEXT["account_uuid"]
     )
-
-    uuid = models.UUIDField(unique=True, editable=False)
-    user_id = models.IntegerField(unique=True)
-    email = models.EmailField(unique=True, max_length=100)
-    username = models.CharField(max_length=255, unique=True)
+    user_id = models.PositiveIntegerField(unique=True, help_text=HELPER_TEXT["account_user_id"])
+    email = models.EmailField(
+        unique=True, max_length=100, help_text=HELPER_TEXT["account_email"]
+    )
+    username = models.CharField(
+        max_length=255, unique=True, help_text=HELPER_TEXT["account_username"]
+    )
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="nonactive"
+        max_length=20,
+        choices=STATUS_CHOICES_MODEL,
+        default="nonactive",
+        help_text="status of the account",
     )
 
     def __str__(self):
@@ -29,21 +37,16 @@ class Account(BaseModel):
 
 
 class Wallet(BaseModel):
-    STATUS_CHOICES = (
-        ("active", "Active"),
-        ("nonactive", "Non-Active"),
-    )
-
     account = models.ForeignKey(
-        Account, on_delete=models.CASCADE, related_name="wallets"
+        Account, on_delete=models.CASCADE, related_name="wallets", help_text=HELPER_TEXT['account']
     )
-    user_id = models.IntegerField()
-    blockchain = models.CharField(max_length=50)
-    network = models.CharField(max_length=20)
-    address = models.CharField(unique=True, max_length=255)
-    label = models.CharField(unique=True, max_length=255)
+    user_id = models.PositiveIntegerField(help_text=HELPER_TEXT['user_id'])
+    blockchain = models.CharField(max_length=50, help_text=HELPER_TEXT["blockchain"])
+    network = models.CharField(max_length=20, help_text=HELPER_TEXT["network"])
+    address = models.CharField(unique=True, max_length=255, help_text=HELPER_TEXT['address'])
+    label = models.CharField(unique=True, max_length=255, help_text=HELPER_TEXT['wallet_label'])
     status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default="nonactive"
+        max_length=20, choices=STATUS_CHOICES_MODEL, default="nonactive", help_text="status of the wallet"
     )
 
     def __str__(self):
@@ -62,11 +65,7 @@ class Wallet(BaseModel):
 
         handler = CreateAddressHandler()
 
-        # handler.create_address(
-        #     blockchain=blockchain, network=network, label=account.user_id
-        # )
-
-        handler.create_fake_adress(
+        handler.create_address(
             blockchain=blockchain, network=network, label=account.user_id
         )
 
@@ -107,11 +106,11 @@ class Wallet(BaseModel):
 
 class WalletAttribut(BaseModel):
     wallet = models.OneToOneField(
-        Wallet, on_delete=models.CASCADE, related_name="attributs"
+        Wallet, on_delete=models.CASCADE, related_name="attributs", help_text=HELPER_TEXT["wallet"]
     )
-    address_qr = models.TextField(null=True, blank=True)
-    symbol = models.CharField(max_length=5, null=True, blank=True)
-    logo = models.TextField(null=True, blank=True)
+    address_qr = models.TextField(null=True, blank=True, help_text=HELPER_TEXT["address_qr"])
+    symbol = models.CharField(max_length=5, null=True, blank=True, help_text=HELPER_TEXT["wallet_symbol"])
+    logo = models.TextField(null=True, blank=True, help_text=HELPER_TEXT["wallet_logo"])
 
     def __str__(self):
         return str(self.wallet.address)
@@ -122,13 +121,13 @@ class WalletAttribut(BaseModel):
 
 class WalletBalance(BaseModel):
     wallet = models.OneToOneField(
-        Wallet, on_delete=models.CASCADE, related_name="balance", null=True, blank=True
+        Wallet, on_delete=models.CASCADE, related_name="balance", null=True, blank=True, help_text=HELPER_TEXT["wallet"]
     )
     amount = models.DecimalField(
-        max_digits=25, decimal_places=10, null=True, blank=True
+        max_digits=25, decimal_places=10, null=True, blank=True, help_text=HELPER_TEXT["wallet_balance_amount"]
     )
-    unit = models.CharField(max_length=10, null=True, blank=True)
-    created_timestamp = models.DateTimeField(null=True, blank=True)
+    unit = models.CharField(max_length=10, null=True, blank=True, help_text=HELPER_TEXT["wallet_balance_unit"])
+    created_timestamp = models.DateTimeField(null=True, blank=True, help_text=HELPER_TEXT["created_timestamp"])
 
     def __str__(self):
         return str(self.wallet.address)

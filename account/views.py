@@ -4,35 +4,19 @@ from account.models import Account, Wallet
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from account.schemas import create_wallet_schema
 
 
-class UserListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+class UserListCreateView(generics.ListCreateAPIView):
+    # permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
 
 
-class UserDetailByIDView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
+class UserDetailSuspendView(generics.RetrieveDestroyAPIView):
+    # permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
-    serializer_class = AccountSerializer
-
-
-class UserDetailView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Account.objects.filter(status="active")
-    serializer_class = AccountSerializer
-    lookup_field = "user_id"
-
-
-class UserCreateView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = AccountSerializer
-
-
-class UserSuspendView(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Account.objects.filter(status__in=["active", "nonactive"])
     serializer_class = AccountSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -42,9 +26,10 @@ class UserSuspendView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserSuspendByUserIDView(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Account.objects.filter(status__in=["active", "nonactive"])
+class UserDetailSuspendUserView(generics.RetrieveAPIView):
+    # permission_classes = [IsAuthenticated]
+    queryset = Account.objects.filter(status="active")
+    serializer_class = AccountSerializer
     lookup_field = "user_id"
 
     def delete(self, request, *args, **kwargs):
@@ -54,25 +39,26 @@ class UserSuspendByUserIDView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class WalletCreateView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = WalletSerializer
-
-
-class WalletListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+class WalletListCreateView(generics.ListCreateAPIView):
+    # permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
+    @swagger_auto_schema(**create_wallet_schema)
+    def post(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
 
 class WalletDetailView(generics.RetrieveAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
 
 class WalletListByUserIDView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
-    lookup_field = "account__user_id"
+    
+    def get_queryset(self):
+        return self.queryset.filter(account__user_id=self.kwargs.pop('user_id'))
