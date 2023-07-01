@@ -106,6 +106,8 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'utils.renderers.SuccessJsonResponse',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 10
 }
 
 DRF_STANDARDIZED_ERRORS = {"EXCEPTION_FORMATTER_CLASS": "utils.exceptions.MyExceptionFormatter"}
@@ -125,7 +127,7 @@ SWAGGER_SETTINGS = {
             'in': 'header'
         }
     },
-    'USE_SESSION_AUTH': False
+    'USE_SESSION_AUTH': False,
 }
 
 # jet admin logout url

@@ -27,3 +27,32 @@ create_wallet_schema = {
         ),
     },
 }
+
+get_account_list_schema = {
+    'manual_parameters': [
+        openapi.Parameter(
+            name='search',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description='Search in user_id, email, or username.'
+        ),
+        openapi.Parameter(
+            name='ordering',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_STRING,
+            description='Specify the ordering of the results. Prefix with "-" for descending order. Available fields: id, created_at, user_id.'
+        ),
+        openapi.Parameter(
+            name='page',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_INTEGER,
+            description='The page number of the results.'
+        ),
+        openapi.Parameter(
+            name='size',
+            in_=openapi.IN_QUERY,
+            type=openapi.TYPE_INTEGER,
+            description='The number of items to return per page.'
+        ),
+    ]
+}

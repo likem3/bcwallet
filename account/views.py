@@ -5,22 +5,26 @@ from rest_framework.response import Response
 from rest_framework import status, filters
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
-from account.schemas import create_wallet_schema
+from account.schemas import create_wallet_schema, get_account_list_schema
+from utils.paginations import SizePagePagination
 from django_filters.rest_framework import DjangoFilterBackend
 
 class UserListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
-
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['id', 'user_id', 'email', 'status']
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['user_id', 'email', 'username']
-    ordering_fields = ['id', 'created_at', 'user_id']
+    ordering_fields = ['id', '-id', 'created_at', '-created_at', 'user_id']
+    pagination_class = SizePagePagination
+
+    @swagger_auto_schema(**get_account_list_schema)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
 class UserDetailSuspendView(generics.RetrieveDestroyAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
 
@@ -32,7 +36,7 @@ class UserDetailSuspendView(generics.RetrieveDestroyAPIView):
 
 
 class UserDetailSuspendUserView(generics.RetrieveAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
     lookup_field = "user_id"
@@ -45,9 +49,14 @@ class UserDetailSuspendUserView(generics.RetrieveAPIView):
 
 
 class WalletListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['user_id','blockchain', 'network', 'address', 'label']
+    search_fields = ['user_id', 'blockchain', 'network', 'address', 'label']
+    ordering_fields = ['id', '-id', 'created_at', '-created_at', 'user_id', 'label']
+    pagination_class = SizePagePagination
 
     @swagger_auto_schema(**create_wallet_schema)
     def post(self, request, *args, **kwargs):
@@ -55,13 +64,13 @@ class WalletListCreateView(generics.ListCreateAPIView):
 
 
 class WalletDetailView(generics.RetrieveAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
 
 class WalletListByUserIDView(generics.ListAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
