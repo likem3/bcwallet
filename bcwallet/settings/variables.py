@@ -1,6 +1,12 @@
-STATUS_OPTIONS = (
+STATUS_OPTIONS_SERIALIZER = (
     'active', 'Active',
     'nonactive', 'Nonactive'
+)
+
+STATUS_CHOICES_MODEL = (
+    ("active", "Active"),
+    ("nonactive", "Non-active"),
+    ("suspended", "Suspended"),
 )
 
 BLOCKCHAIN_OPTIONS = (
@@ -106,4 +112,67 @@ BLOCKCHAIN_NETWORK_MAP = {
         'production': 'mainnet',
         'development': 'nile'
     },
+}
+
+BLOCKCHAIN_MINIMUM_DEPOSIT_MAP = {
+    'bitcoin' : '0.0001',
+    'bitcoin-cash' : '0.01',
+    'litecoin' : '0.01',
+    'dogecoin' : '20.00',
+    'dash' : '0.1',
+    'ethereum' : '0.001',
+    'ethereum-classic' : '0.1',
+    'xrp' : '4.00',
+    'zcash' : '0.1',
+    'binance-smart-chain' : '0.01',
+    'tron' : '0.01',
+}
+
+TRANSACTION_STATUS = (
+    ("pending", "Pending"),
+    ("confirming", "Confirming"),
+    ("completed", "Completed"),
+    ("failed", "Failed"),
+    ("cancelled", "Cancelled"),
+)
+
+NETWORK_RULE = """
+Network rule:
+In a production env network value "mainnet" for all blockchain.
+Else, "ethereum" use "goerli", "ethereum-classic" use "mordor",
+"tron" use "nile", rest use "testnet".
+"""
+
+HELPER_TEXT = {
+    "account_uuid": "Unique UUID of the registered user",
+    "account_user_id": "User ID of the registered user",
+    "account_email": "Email of the registered user",
+    "account_username": "Username of the registered user",
+    "user_id": "ID of the associated user (source: account.user_id)",
+    "blockchain": "Related blockchain that will be used",
+    "network": f"Blockchain network \n{NETWORK_RULE}",
+    "account": "Related account object",
+    "wallet": "Related wallet object",
+    "address": "String address of the blockchain wallet",
+    "wallet_label": "Label of the wallet",
+    "address_qr": "Base64 representation of the wallet address",
+    "wallet_symbol": "Wallet blockchain symbol (e.g., ETH, BTC, etc.)",
+    "wallet_logo": "URL path to the wallet blockchain logo",
+    "wallet_balance_amount": "Nominal amount in the wallet",
+    "wallet_balance_unit": "Symbol of the wallet currency",
+    "created_timestamp": "Timestamp of when the remote wallet was created",
+    "trx_code": "Code of the transaction, also serves as the transaction identifier",
+    "trx_origin_code": "Origin transaction if the transaction is derived from another transaction",
+    "trx_from_address": "Currency address that sends in the transaction",
+    "trx_to_address": "Currency address that receives in the transaction",
+    "trx_from_currency": "Symbol of the source currency such as BTC, ETH, etc",
+    "trx_to_currency": "Symbol of the target currency such as BTC, ETH, etc",
+    "trx_from_address": "Currency address that sends in the transaction",
+    "trx_amount": "Separated by a dot, the amount to be received (e.g., 0.001)",
+    "trx_rate": "Separated by a dot, exchange rate if different currencies",
+    "trx_status": "Transaction status",
+    "trx_cancel_reason": "Reason why the transaction becomes canceled",
+    "trx_proof_of_payment": "Image in base64 format of the transaction receipt",
+    "trx_expired_at": "The expiration of the transaction before it gets ignored",
+    "trx_receipt_id": "The transaction hash (txid)",
 }
