@@ -178,3 +178,6 @@ setting_*.py
 
 # ignore beat schedule 
 celerybeat-schedule.*
+
+# static files
+static/

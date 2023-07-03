@@ -1,17 +1,42 @@
-from recharge.serializers import DepositWalletSerializer
+from recharge.serializers import (
+    DepositTransactionSerializer,
+    UpdateReceiptTransactionSerializer,
+)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics
+from recharge.models import Transaction
+from account.views import WalletListCreateView
 
 
-class InitiateTransactionView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
-    serializer_class = DepositWalletSerializer
+class DepositRechargeView(WalletListCreateView):
+    allowed_methods = ['POST']
+
+
+class CreateDepositTransactionView(generics.CreateAPIView):
+    # permission_classes = [IsAuthenticated]
+    serializer_class = DepositTransactionSerializer
 
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
-    # def get_serializer_context(self):
-    #     context = super().get_serializer_context()
-    #     account = get_object_or_404(Account, user_id=self.kwargs.get("user_id"))
-    #     context["account"] = account
-    #     return context
+
+class TransactionListByUserIDView(generics.ListAPIView):
+    # permission_classes = [IsAuthenticated]
+    queryset = Transaction.objects.filter(account__status="active")
+    serializer_class = DepositTransactionSerializer
+    lookup_field = "account__user_id"
+
+
+class TransactionDetailByUserIDView(generics.RetrieveUpdateAPIView):
+    # permission_classes = [IsAuthenticated]
+    queryset = Transaction.objects.filter(account__status="active")
+    serializer_class = UpdateReceiptTransactionSerializer
+    lookup_field = "code"
+
+    def get_queryset(self):
+        if self.request.method in ["PUT", "PATCH"]:
+            query_filter = {"status": "pending"}
+        else:
+            query_filter = {}
+
+        return super().get_queryset().filter(**query_filter)

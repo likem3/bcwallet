@@ -25,22 +25,13 @@ class ListAddressesHandler(BaseCryptoAPI):
             network = network
             api_instance = informative_api.InformativeApi(api_client=api_client)
             wallet_id = self.master_wallet
-            # get_address_balance = 
+            # get_address_balance =
             try:
-                k = {
-                    'limit': 2,
-                    'offset': 1
-                }
+                k = {"limit": 2, "offset": 1}
                 api_response = api_instance.list_deposit_addresses(
-                    blockchain=blockchain,
-                    network=network,
-                    wallet_id=wallet_id,
-                    **k
+                    blockchain=blockchain, network=network, wallet_id=wallet_id, **k
                 )
                 return api_response
             except ApiException as e:
                 print(f"generate_deposit_address: {e}")
                 return
-
-
-

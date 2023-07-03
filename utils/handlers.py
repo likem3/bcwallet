@@ -2,14 +2,36 @@ import qrcode
 import base64
 import os
 from io import BytesIO
+import time
 from PIL import Image
-from bcwallet.settings import BASE_DIR
+from bcwallet.settings import (
+    BASE_DIR,
+    BLOCKCHAIN_NETWORK_MAP,
+    ENVIRONMENT_SETTING,
+    NETWORK_CODE,
+    BLOCKCHAIN_CODE,
+    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
+)
+from decimal import Decimal
 
 
-def inmemoryfile_to_base64(inmemory_image):
-    image_content = inmemory_image.read()
-    encoded_image = base64.b64encode(image_content)
-    return encoded_image.decode("utf-8")
+def handle_blockchain_network(blockchain):
+    if ENVIRONMENT_SETTING == "production":
+        return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["production"]
+    return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
+
+
+def handle_minimum_deposit_amount(blockchain):
+    if ENVIRONMENT_SETTING == "production":
+        return BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[blockchain]
+    return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[blockchain]) / 10
+
+
+def handle_transaction_code(blockchain, network, user_id, transaction_type="DP"):
+    user_id = str(user_id).zfill(8)
+    ncode = NETWORK_CODE[network]
+    bcode = BLOCKCHAIN_CODE[blockchain]
+    return f"{transaction_type}{bcode}{ncode}-{user_id}-{int(time.time())}"
 
 
 def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):

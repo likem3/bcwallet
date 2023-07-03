@@ -2,31 +2,30 @@ from rest_framework import generics
 from account.serializers import AccountSerializer, WalletSerializer
 from account.models import Account, Wallet
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, filters
+from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from account.schemas import create_wallet_schema, get_account_list_schema
+from utils.paginations import SizePagePagination
+from django_filters.rest_framework import DjangoFilterBackend
 
-
-class UserListView(generics.ListAPIView):
+class UserListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['user_id', 'email', 'username']
+    ordering_fields = ['id', '-id', 'created_at', '-created_at', 'user_id']
+    pagination_class = SizePagePagination
+
+    @swagger_auto_schema(**get_account_list_schema)
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)
 
 
-class UserDetailByIDView(generics.RetrieveAPIView):
+class UserDetailSuspendView(generics.RetrieveDestroyAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
-    serializer_class = AccountSerializer
-
-
-class UserDetailView(generics.RetrieveAPIView):
-    queryset = Account.objects.filter(status="active")
-    serializer_class = AccountSerializer
-    lookup_field = "user_id"
-
-
-class UserCreateView(generics.CreateAPIView):
-    serializer_class = AccountSerializer
-
-
-class UserSuspendView(generics.DestroyAPIView):
-    queryset = Account.objects.filter(status__in=["active", "nonactive"])
     serializer_class = AccountSerializer
 
     def delete(self, request, *args, **kwargs):
@@ -36,8 +35,10 @@ class UserSuspendView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserSuspendByUserIDView(generics.DestroyAPIView):
-    queryset = Account.objects.filter(status__in=["active", "nonactive"])
+class UserDetailSuspendUserView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = Account.objects.filter(status="active")
+    serializer_class = AccountSerializer
     lookup_field = "user_id"
 
     def delete(self, request, *args, **kwargs):
@@ -47,21 +48,31 @@ class UserSuspendByUserIDView(generics.DestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class WalletCreateView(generics.CreateAPIView):
-    serializer_class = WalletSerializer
-
-
-class WalletListView(generics.ListAPIView):
+class WalletListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['user_id','blockchain', 'network', 'address', 'label']
+    search_fields = ['user_id', 'blockchain', 'network', 'address', 'label']
+    ordering_fields = ['id', '-id', 'created_at', '-created_at', 'user_id', 'label']
+    pagination_class = SizePagePagination
+
+    @swagger_auto_schema(**create_wallet_schema)
+    def post(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
 
 class WalletDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
 
 
 class WalletListByUserIDView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
-    lookup_field = "account__user_id"
+
+    def get_queryset(self):
+        return self.queryset.filter(account__user_id=self.kwargs.pop("user_id"))
