@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from account.models import Account, Wallet as AccountWallet, WalletAttribut
-from bcwallet.settings import BLOCKCHAIN_OPTIONS, NETWORK_OPTIONS
+from bcwallet.settings import BLOCKCHAIN_OPTIONS
 from rest_framework.exceptions import APIException
 from recharge.models import Transaction
 from utils.handlers import handle_blockchain_network, handle_minimum_deposit_amount

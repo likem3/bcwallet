@@ -100,7 +100,11 @@ class Transaction(ExtraBaseModel):
         max_length=255, null=True, blank=True, help_text=HELPER_TEXT["trx_receipt_id"]
     )
     type = models.CharField(
-        max_length=20, null=True, blank=True, help_text=HELPER_TEXT['trx_type'], choices=TRANSACTION_TYPE_OPTION
+        max_length=20,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["trx_type"],
+        choices=TRANSACTION_TYPE_OPTION,
     )
 
     def __str__(self):

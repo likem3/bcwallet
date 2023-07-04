@@ -12,17 +12,21 @@ from utils.paginations import SizePagePagination
 
 
 class DepositRechargeView(WalletListCreateView):
-    allowed_methods = ['POST']
+    allowed_methods = ["POST"]
 
 
 class CreateDepositTransactionView(generics.ListCreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(account__status="active")
     serializer_class = DepositTransactionSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['code','status', 'type']
-    search_fields = ['code', 'status', 'type']
-    ordering_fields = ['id', '-id', 'created_at', '-created_at']
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["code", "status", "type"]
+    search_fields = ["code", "status", "type"]
+    ordering_fields = ["id", "-id", "created_at", "-created_at"]
     pagination_class = SizePagePagination
 
     def post(self, request, *args, **kwargs):
@@ -30,14 +34,14 @@ class CreateDepositTransactionView(generics.ListCreateAPIView):
 
 
 class TransactionListByUserIDView(generics.ListAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(account__status="active")
     serializer_class = DepositTransactionSerializer
     lookup_field = "account__user_id"
 
 
 class TransactionDetailByUserIDView(generics.RetrieveUpdateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(account__status="active")
     serializer_class = UpdateReceiptTransactionSerializer
     lookup_field = "code"

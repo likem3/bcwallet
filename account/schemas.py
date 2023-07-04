@@ -29,30 +29,31 @@ create_wallet_schema = {
 }
 
 get_account_list_schema = {
-    'manual_parameters': [
+    "manual_parameters": [
         openapi.Parameter(
-            name='search',
+            name="search",
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_STRING,
-            description='Search in user_id, email, or username.'
+            description="Search in user_id, email, or username.",
         ),
         openapi.Parameter(
-            name='ordering',
+            name="ordering",
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_STRING,
-            description='Specify the ordering of the results. Prefix with "-" for descending order. Available fields: id, created_at, user_id.'
+            description='Specify the ordering of the results. Prefix with "-" for \
+                descen ding order. Available fields: id, created_at, user_id.',
         ),
         openapi.Parameter(
-            name='page',
+            name="page",
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_INTEGER,
-            description='The page number of the results.'
+            description="The page number of the results.",
         ),
         openapi.Parameter(
-            name='size',
+            name="size",
             in_=openapi.IN_QUERY,
             type=openapi.TYPE_INTEGER,
-            description='The number of items to return per page.'
+            description="The number of items to return per page.",
         ),
     ]
 }
