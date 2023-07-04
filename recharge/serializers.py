@@ -46,6 +46,7 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
             "blockchain",
             "user_id",
             "detail",
+            "type",
         ]
         read_only_fields = [
             "id",

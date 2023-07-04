@@ -4,7 +4,7 @@ from account.models import Account, Wallet
 from utils.handlers import handle_transaction_code
 from django.utils import timezone
 from datetime import timedelta
-from bcwallet.settings import TRANSACTION_STATUS, HELPER_TEXT
+from bcwallet.settings import TRANSACTION_STATUS, HELPER_TEXT, TRANSACTION_TYPE_OPTION
 
 
 class Transaction(ExtraBaseModel):
@@ -98,6 +98,9 @@ class Transaction(ExtraBaseModel):
     )
     receipt_id = models.CharField(
         max_length=255, null=True, blank=True, help_text=HELPER_TEXT["trx_receipt_id"]
+    )
+    type = models.CharField(
+        max_length=20, null=True, blank=True, help_text=HELPER_TEXT['trx_type'], choices=TRANSACTION_TYPE_OPTION
     )
 
     def __str__(self):
