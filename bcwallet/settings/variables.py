@@ -136,6 +136,11 @@ TRANSACTION_STATUS = (
     ("cancelled", "Cancelled"),
 )
 
+TRANSACTION_TYPE_OPTION = (
+    ('deposit', "Deposit"),
+    ('withdrawal', "Withdrawal"),
+)
+
 NETWORK_RULE = """
 Network rule:
 In a production env network value "mainnet" for all blockchain.
@@ -175,4 +180,5 @@ HELPER_TEXT = {
     "trx_proof_of_payment": "Image in base64 format of the transaction receipt",
     "trx_expired_at": "The expiration of the transaction before it gets ignored",
     "trx_receipt_id": "The transaction hash (txid)",
+    "trx_type": "The transaction type",
 }
