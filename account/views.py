@@ -9,13 +9,14 @@ from account.schemas import create_wallet_schema, get_account_list_schema
 from utils.paginations import SizePagePagination
 from django_filters.rest_framework import DjangoFilterBackend
 
+
 class UserListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['user_id', 'email', 'username']
-    ordering_fields = ['id', '-id', 'created_at', '-created_at', 'user_id']
+    search_fields = ["user_id", "email", "username"]
+    ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id"]
     pagination_class = SizePagePagination
 
     @swagger_auto_schema(**get_account_list_schema)
@@ -52,10 +53,14 @@ class WalletListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['user_id','blockchain', 'network', 'address', 'label']
-    search_fields = ['user_id', 'blockchain', 'network', 'address', 'label']
-    ordering_fields = ['id', '-id', 'created_at', '-created_at', 'user_id', 'label']
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_fields = ["user_id", "blockchain", "network", "address", "label"]
+    search_fields = ["user_id", "blockchain", "network", "address", "label"]
+    ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id", "label"]
     pagination_class = SizePagePagination
 
     @swagger_auto_schema(**create_wallet_schema)
