@@ -1,14 +1,18 @@
 from recharge.serializers import (
     DepositTransactionSerializer,
     UpdateReceiptTransactionSerializer,
+    CurrencySerializer,
 )
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics, filters
+from rest_framework import generics, filters, status
+from rest_framework.views import APIView
 from recharge.models import Transaction
 from account.views import WalletListCreateView
 from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from utils.paginations import SizePagePagination
+from apis.addrbank.currency import Currency
+from rest_framework.response import Response
 
 
 class DepositRechargeView(WalletListCreateView):
@@ -57,3 +61,19 @@ class TransactionDetailByUserIDView(generics.RetrieveUpdateAPIView):
     @swagger_auto_schema(operation_id="user-transaction-detail")
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+
+
+class CurrencyListClass(APIView):
+
+    def get(self, request):
+        currency = Currency()
+        curencies = currency.get_currencies()
+        try:
+            serializer = CurrencySerializer(data=[curencies], many=True)
+            serializer.is_valid()
+
+            return Response(serializer.data, status=200)
+        
+        except Exception as e:
+            print(str(e))
+            return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

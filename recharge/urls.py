@@ -4,6 +4,7 @@ from recharge.views import (
     CreateDepositTransactionView,
     TransactionListByUserIDView,
     TransactionDetailByUserIDView,
+    CurrencyListClass,
 )
 
 urlpatterns = [
@@ -32,9 +33,9 @@ urlpatterns = [
         TransactionDetailByUserIDView.as_view(),
         name="user-transaction-detail",
     ),
-    # path(
-    #     'transaction/<int:user_id>/<str:code>/receipt/',
-    #     UpdateReceiptIdDepositTransactionView.as_view(),
-    #     name="user-transaction-update-recipe_id"
-    # ),
+    path(
+        'currencies/',
+        CurrencyListClass.as_view(),
+        name="currency-list"
+    ),
 ]

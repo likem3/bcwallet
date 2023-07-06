@@ -141,3 +141,11 @@ class UpdateReceiptTransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = Transaction.get_fields()
         read_only_fields = Transaction.get_fields(excludes=["receipt_id"])
+
+
+class CurrencySerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    symbol = serializers.CharField()
+    blockchain = serializers.CharField()
+    std = serializers.CharField()
