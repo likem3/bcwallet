@@ -21,17 +21,16 @@ def handle_blockchain_network(blockchain):
     return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
 
 
-def handle_minimum_deposit_amount(blockchain):
+def handle_minimum_deposit_amount(symbol):
     if ENVIRONMENT_SETTING == "production":
-        return BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[blockchain]
-    return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[blockchain]) / 10
+        return BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]
+    return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]) / 10
 
 
-def handle_transaction_code(blockchain, network, user_id, transaction_type="DP"):
+def handle_transaction_code(symbol, user_id, transaction_type="DP"):
     user_id = str(user_id).zfill(8)
-    ncode = NETWORK_CODE[network]
-    bcode = BLOCKCHAIN_CODE[blockchain]
-    return f"{transaction_type}{bcode}{ncode}-{user_id}-{int(time.time())}"
+    bcode = symbol
+    return f"{transaction_type}{bcode}{user_id}-{int(time.time())}"
 
 
 def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):

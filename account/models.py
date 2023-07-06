@@ -1,10 +1,10 @@
 from django.db import models
 from utils.models import BaseModel
 from apis.cryptoapi.address import CreateAddressHandler
+from apis.addrbank.address import Address as AddressHandler
 from utils.handlers import generate_qrcode_with_logo
 from bcwallet.settings import (
     LOGO_SETTINGS,
-    BLOCKCHAIN_CODE,
     STATUS_CHOICES_MODEL,
     HELPER_TEXT,
 )
@@ -46,8 +46,11 @@ class Wallet(BaseModel):
         help_text=HELPER_TEXT["account"],
     )
     user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
-    blockchain = models.CharField(max_length=50, help_text=HELPER_TEXT["blockchain"])
-    network = models.CharField(max_length=20, help_text=HELPER_TEXT["network"])
+    currency_id = models.PositiveIntegerField(help_text=HELPER_TEXT["currency_id"])
+    currency_name = models.CharField(max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_name"])
+    currency_symbol = models.CharField(max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"])
+    currency_blockchain = models.CharField(max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_blockchain"])
+    currency_std = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"])
     address = models.CharField(
         unique=True, max_length=255, help_text=HELPER_TEXT["address"]
     )
@@ -57,7 +60,7 @@ class Wallet(BaseModel):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES_MODEL,
-        default="nonactive",
+        default="active",
         help_text="status of the wallet",
     )
 
@@ -69,50 +72,59 @@ class Wallet(BaseModel):
 
     @classmethod
     @transaction.atomic
-    def create_user_wallet(cls, account, user_id, blockchain, network, status="active"):
-        if cls.objects.filter(
-            account=account, user_id=user_id, blockchain=blockchain, network=network
-        ).exists():
-            return
+    def create_user_wallet(cls, account, user_id, currency_id, status="active"):
+        query = {
+            'account': account,
+            'user_id': user_id,
+            'currency_id': currency_id,
+        }
 
-        handler = CreateAddressHandler()
+        try:
+            return cls.objects.get(**query)
 
-        handler.create_address(
-            blockchain=blockchain, network=network, label=account.user_id
-        )
+        except Wallet.DoesNotExist:
+            handler = AddressHandler()
 
-        if handler._address and handler._label:
-            wallet = cls.objects.create(
-                account=account,
-                user_id=user_id,
-                blockchain=blockchain,
-                network=network,
-                address=handler._address,
-                label=handler._label,
-                status=status,
+            handler.create_address(
+                currency_id=currency_id, user_id=user_id
             )
 
-            wallet_logo = LOGO_SETTINGS[wallet.blockchain]
-            wallet_image_b64 = generate_qrcode_with_logo(
-                text=wallet.address, logo_path=wallet_logo
-            )
-            wallet_symbol = BLOCKCHAIN_CODE[wallet.blockchain]
+            query['address'] = handler._address
+            query['label'] = handler._label
+            query['currency_id'] = handler._currency['id']
+            query['currency_name'] = handler._currency['name']
+            query['currency_symbol'] = handler._currency['symbol']
+            query['currency_blockchain'] = handler._currency['blockchain']
+            query['currency_std'] = handler._currency['std']
+            query['status'] = status
 
-            WalletAttribut.objects.create(
-                wallet=wallet,
-                address_qr=wallet_image_b64,
-                symbol=wallet_symbol,
-                logo=wallet_logo,
-            )
+            wallet_logo = LOGO_SETTINGS[query['currency_symbol']]
 
-            return wallet
-        else:
-            return
+            if handler._address and handler._label and handler._currency:
+                wallet = cls.objects.create(**query)
+
+
+                wallet_image_b64 = generate_qrcode_with_logo(
+                    text=wallet.address, logo_path=wallet_logo
+                )
+
+                wallet_symbol = query['currency_symbol']
+
+                WalletAttribut.objects.create(
+                    wallet=wallet,
+                    address_qr=wallet_image_b64,
+                    symbol=wallet_symbol,
+                    logo=wallet_logo,
+                )
+
+                return wallet
+            else:
+                return
 
     @classmethod
-    def get_account_blockchain_wallet(cls, account, blockchain, network):
+    def get_account_blockchain_wallet(cls, account, user_id, currency_id):
         return cls.objects.filter(
-            account=account, blockchain=blockchain, network=network
+            account=account, user_id=user_id, currency_id=currency_id
         )
 
 
@@ -139,7 +151,7 @@ class WalletAttribut(BaseModel):
 
 
 class WalletBalance(BaseModel):
-    wallet = models.OneToOneField(
+    wallet = models.ForeignKey(
         Wallet,
         on_delete=models.CASCADE,
         related_name="balance",
@@ -154,14 +166,18 @@ class WalletBalance(BaseModel):
         blank=True,
         help_text=HELPER_TEXT["wallet_balance_amount"],
     )
+    amount_change = models.DecimalField(
+        max_digits=25,
+        decimal_places=10,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["wallet_balance_amount"],
+    )
     unit = models.CharField(
         max_length=10,
         null=True,
         blank=True,
         help_text=HELPER_TEXT["wallet_balance_unit"],
-    )
-    created_timestamp = models.DateTimeField(
-        null=True, blank=True, help_text=HELPER_TEXT["created_timestamp"]
     )
 
     def __str__(self):

@@ -58,8 +58,8 @@ class WalletListCreateView(generics.ListCreateAPIView):
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_fields = ["user_id", "blockchain", "network", "address", "label"]
-    search_fields = ["user_id", "blockchain", "network", "address", "label"]
+    filterset_fields = ["user_id", "address", "label"]
+    search_fields = ["user_id", "address", "label"]
     ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id", "label"]
     pagination_class = SizePagePagination
 

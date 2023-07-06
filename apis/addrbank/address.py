@@ -5,6 +5,7 @@ import requests
 class Address(BaseAddrBank):
     _address = None
     _label = None
+    _currency = None
     _json = None
 
     def __init__(self):
@@ -31,6 +32,7 @@ class Address(BaseAddrBank):
 
             self._address = json_response['address']
             self._label = json_response['label']
+            self._currency = json_response['currency']
             self._json = {"status": True, "result": json_response}
 
 
@@ -72,4 +74,5 @@ class Address(BaseAddrBank):
 
         self._address = json_response['address']
         self._label = json_response['label']
+        self._currency = json_response['currency']
         self._json = {"status": True, "result": json_response}

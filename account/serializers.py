@@ -60,38 +60,40 @@ class WalletSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wallet
-        fields = Wallet.get_fields(extras=["attributs", "balance"])
-        read_only_fields = Wallet.get_fields(excludes=["user_id", "blockchain"])
+        fields = Wallet.get_fields(excludes=['wallet_transactions'], extras=["attributs", "balance"])
+        read_only_fields = Wallet.get_fields(excludes=["user_id", "currency_id"])
+        # exclude = ['wallet_transactions']
 
     def validate(self, data):
-        breakpoint()
-        blockchain, network = handle_blockchain_network(data["blockchain"])
+        # blockchain, network = handle_blockchain_network(data["blockchain"])
+        currency_id = data['currency_id']
 
         if not Account.objects.filter(
             user_id=data["user_id"], status="active"
         ).exists():
             raise serializers.ValidationError("invalid user id")
 
-        if Wallet.objects.filter(
-            user_id=data["user_id"],
-            blockchain=blockchain,
-            network=network,
-        ).exists():
-            raise serializers.ValidationError(
-                "wallet with specific blockhain and network already created"
-            )
+        # if Wallet.objects.filter(
+        #     user_id=data["user_id"],
+        #     currency_id=currency_id,
+        # ).exists():
+        #     raise serializers.ValidationError(
+        #         "wallet with specific blockhain and network already created"
+        #     )
         return data
 
     def create(self, validated_data):
         account = Account.objects.get(user_id=validated_data["user_id"])
-        _, network = handle_blockchain_network(validated_data["blockchain"])
-
         try:
-            return Wallet.create_user_wallet(
+            wallet = Wallet.create_user_wallet(
                 account=account,
-                network=network,
                 **validated_data,
             )
+
+            if not wallet:
+                raise serializers.ValidationError({'creating': 'Server error!'})
+            
+            return wallet
 
         except Exception as e:
             raise ParseError(f"error {e}")

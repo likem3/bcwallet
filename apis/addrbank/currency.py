@@ -16,3 +16,14 @@ class Currency(BaseAddrBank):
                 return api_response.json()
         except:
             return
+        
+    def get_currency_detail(self, id):
+        url = f"{self.base_url}currencies/{id}/"
+        try:
+            api_response = requests.get(url)
+            if api_response.status_code != 200:
+                return
+            else:
+                return api_response.json()
+        except:
+            return

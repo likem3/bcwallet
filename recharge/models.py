@@ -57,11 +57,21 @@ class Transaction(ExtraBaseModel):
         blank=True,
         help_text=HELPER_TEXT["trx_to_currency"],
     )
-    blockchain = models.CharField(
-        max_length=30, null=True, blank=True, help_text=HELPER_TEXT["blockchain"]
+    user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
+    currency_id = models.PositiveIntegerField(
+        help_text=HELPER_TEXT["currency_id"]
     )
-    network = models.CharField(
-        max_length=30, null=True, blank=True, help_text=HELPER_TEXT["network"]
+    currency_name = models.CharField(
+        max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_name"]
+    )
+    currency_symbol = models.CharField(
+        max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"]
+    )
+    currency_blockchain = models.CharField(
+        max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_blockchain"]
+    )
+    currency_std = models.CharField(
+        max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"]
     )
     amount = models.DecimalField(
         max_digits=25,
@@ -96,8 +106,8 @@ class Transaction(ExtraBaseModel):
         blank=True,
         help_text=HELPER_TEXT["trx_expired_at"],
     )
-    receipt_id = models.CharField(
-        max_length=255, null=True, blank=True, help_text=HELPER_TEXT["trx_receipt_id"]
+    transaction_id = models.CharField(
+        max_length=255, help_text=HELPER_TEXT["trx_transaction_id"]
     )
     type = models.CharField(
         max_length=20,
@@ -114,18 +124,39 @@ class Transaction(ExtraBaseModel):
         db_table = "recharge_transactions"
 
     @classmethod
-    def create_deposit_transaction(cls, account, wallet, blockchain, network, amount):
+    def create_deposit_transaction(
+        cls,
+        account,
+        wallet,
+        user_id,
+        amount,
+        currency_id,
+        currency_name,
+        currency_symbol,
+        currency_blockchain,
+        currency_std,
+        transaction_id
+    ):
+        query = {
+            'code': handle_transaction_code(wallet.currency_symbol, account.user_id, "DP"),
+            'account': account,
+            'wallet': wallet,
+            'to_address': wallet.address,
+            'from_currency': wallet.attributs.symbol,
+            'to_currency': wallet.attributs.symbol,
+            'user_id': user_id,
+            'currency_id': currency_id,
+            'currency_name': currency_name,
+            'currency_symbol': currency_symbol,
+            'currency_blockchain': currency_blockchain,
+            'currency_std': currency_std,
+            'amount': amount,
+            'transaction_id': transaction_id,
+            'type': 'deposit',
+            'expired_at': (timezone.now() + timedelta(minutes=30)),
+        }
         trx = Transaction.objects.create(
-            code=handle_transaction_code(blockchain, network, account.user_id, "DP"),
-            account=account,
-            wallet=wallet,
-            to_address=wallet.address,
-            from_currency=wallet.attributs.symbol,
-            to_currency=wallet.attributs.symbol,
-            network=network,
-            amount=amount,
-            expired_at=(timezone.now() + timedelta(minutes=30)),
-            blockchain=blockchain,
+            **query
         )
 
         return trx
