@@ -1,10 +1,10 @@
 from django.db import models
-from utils.models import ExtraBaseModel
+from utils.models import BaseModel, ExtraBaseModel
 from account.models import Account, Wallet
 from utils.handlers import handle_transaction_code
 from django.utils import timezone
 from datetime import timedelta
-from bcwallet.settings import TRANSACTION_STATUS, HELPER_TEXT, TRANSACTION_TYPE_OPTION
+from bcwallet.settings import TRANSACTION_STATUS, HELPER_TEXT, TRANSACTION_TYPE_OPTION, WALLET_TASK_STATUS
 
 
 class Transaction(ExtraBaseModel):
@@ -166,3 +166,22 @@ class Transaction(ExtraBaseModel):
         cls, account, wallet, blockchain, network, amount
     ):
         pass
+
+
+class TransactionWalletTask(BaseModel):
+    transaction = models.ForeignKey(Transaction, on_delete=models.CASCADE, help_text=HELPER_TEXT['wtt_transaction_id'])
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, help_text=HELPER_TEXT['wtt_wallet_id'])
+    status = models.CharField(
+        max_length=20,
+        choices=WALLET_TASK_STATUS,
+        default="open",
+        help_text=HELPER_TEXT['wtt_attemp']
+    )
+    attemp = models.PositiveIntegerField(default=0, help_text=HELPER_TEXT['wtt_status'])
+
+    @classmethod
+    def create_task(cls, transaction, wallet):
+        cls.objects.create(
+            transaction=transaction,
+            wallet=wallet,
+        )
