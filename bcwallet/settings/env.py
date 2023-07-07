@@ -34,3 +34,9 @@ CRYPTOAPI_MASTER_WALLET = os.getenv('CRYPTOAPI_MASTER_WALLET')
 CRYPTOAPI_VERSION = os.getenv('CRYPTOAPI_VERSION')
 
 ADDRBANK_BASE_URL = os.getenv('ADDRBANK_BASE_URL')
+
+GETBLOCK_API_KEY = os.getenv('GETBLOCK_API_KEY')
+GETBLOCK_ETHEREUM_JRPC_ADDR = f'https://eth.getblock.io/{GETBLOCK_API_KEY}/mainnet/'
+GETBLOCK_TRON_JRPC_ADDR = f'https://trx.getblock.io/{GETBLOCK_API_KEY}/mainnet/fullnode/jsonrpc'
+GETBLOCK_BTC_BLOCKBOOK_ADDR = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/mainnet/blockbook/api/'
+BLOCKCHAIN_DOGE_ADDR = 'https://api.blockchair.com/dogecoin/dashboards/address/'

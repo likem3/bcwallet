@@ -1,14 +1,11 @@
 from recharge.serializers import (
     DepositTransactionSerializer,
-    # UpdateReceiptTransactionSerializer,
     CurrencySerializer,
 )
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import generics, filters, status
 from rest_framework.views import APIView
 from recharge.models import Transaction
-# from account.views import WalletListCreateView
-# from drf_yasg.utils import swagger_auto_schema
 from django_filters.rest_framework import DjangoFilterBackend
 from utils.paginations import SizePagePagination
 from apis.addrbank.currency import Currency
@@ -17,15 +14,15 @@ from rest_framework.response import Response
 
 class CreateDepositTransactionView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
-    queryset = Transaction.objects.filter(account__status="active")
+    queryset = Transaction.objects.filter(type="deposit", account__status="active")
     serializer_class = DepositTransactionSerializer
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_fields = ["code", "status", "type"]
-    search_fields = ["code", "status", "type"]
+    filterset_fields = ["code", "user_id", "status", "type"]
+    search_fields = ["code", "user_id", "status", "type"]
     ordering_fields = ["id", "-id", "created_at", "-created_at"]
     pagination_class = SizePagePagination
 
@@ -37,7 +34,12 @@ class TransactionListByUserIDView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(account__status="active")
     serializer_class = DepositTransactionSerializer
-    lookup_field = "account__user_id"
+    lookup_url_kwarg = 'user_id'
+
+    def get_queryset(self):
+        user_id = self.kwargs.get(self.lookup_url_kwarg)
+        queryset = super(TransactionListByUserIDView, self).get_queryset()
+        return queryset.filter(account__user_id=user_id)
 
 
 class CurrencyListClass(APIView):

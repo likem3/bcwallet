@@ -1,0 +1,31 @@
+from django.conf import settings as app_settings
+import requests
+from decimal import Decimal
+
+class BTCHandler:
+    def __init__(self):
+        self.url = app_settings.GETBLOCK_BTC_BLOCKBOOK_ADDR
+
+    def parsing_balance(self, response):
+        try:
+            resp_json = response.json()
+            balance_sts = Decimal(resp_json['balance'])
+            return  balance_sts / 100000000
+
+        except Exception as e:
+            print(str(e))
+            return
+
+    def get_balance(self, address):
+        url = f"{self.url}v2/address/{address}"
+        params = {
+            'page': 1,
+            'pageSize': 1,
+            'details': 'basic',
+            'secondary': 'btc'
+        }
+
+        response = requests.get(url, params=params)
+
+        return self.parsing_balance(response)
+
