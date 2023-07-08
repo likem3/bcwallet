@@ -1,12 +1,11 @@
 from django.conf import settings as app_settings
 import requests
 from decimal import Decimal
+from apis.getblock import BaseHandler
 
-
-class DOGEHandler:
-    url = None
-
+class DOGEHandler(BaseHandler):
     def __init__(self):
+        super().__init__()
         self.url = app_settings.BLOCKCHAIN_DOGE_ADDR
 
     def parsing_balance(self, address, response):

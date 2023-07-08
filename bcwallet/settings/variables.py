@@ -147,6 +147,7 @@ WALLET_TASK_STATUS = (
     ('open', 'Open'),
     ('success', 'Success'),
     ('fail', 'Fail'),
+    ('cencel', 'Cancel'),
 )
 
 NETWORK_RULE = """
@@ -194,7 +195,7 @@ HELPER_TEXT = {
     "trx_expired_at": "The expiration of the transaction before it gets ignored",
     "trx_transaction_id": "The transaction hash (txid)",
     "trx_type": "The transaction type",
-    "wtt_transaction_id": "Transaction id related",
+    "wtt_transaction_code": "Transaction code related",
     "wtt_wallet_id": "Wallet id related",
     "wtt_attemp": "Number of attemp running task",
     "wtt_status": "Status task",

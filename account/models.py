@@ -1,14 +1,14 @@
 from django.db import models
 from utils.models import BaseModel
-from apis.cryptoapi.address import CreateAddressHandler
 from apis.addrbank.address import Address as AddressHandler
 from utils.handlers import generate_qrcode_with_logo
 from bcwallet.settings import (
     LOGO_SETTINGS,
     STATUS_CHOICES_MODEL,
     HELPER_TEXT,
+    WALLET_TASK_STATUS
 )
-from django.db import transaction
+from django.db import transaction as app_transaction
 
 
 class Account(BaseModel):
@@ -65,13 +65,13 @@ class Wallet(BaseModel):
     )
 
     def __str__(self):
-        return self.address
+        return f"{self.address} - {self.currency_symbol}"
 
     class Meta:
         db_table = "account_wallets"
 
     @classmethod
-    @transaction.atomic
+    @app_transaction.atomic
     def create_user_wallet(cls, account, user_id, currency_id, status="active"):
         query = {
             'account': account,
@@ -179,9 +179,51 @@ class WalletBalance(BaseModel):
         blank=True,
         help_text=HELPER_TEXT["wallet_balance_unit"],
     )
+    last_updated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="last updated datetime"
+    )
 
     def __str__(self):
         return str(self.wallet.address)
 
     class Meta:
         db_table = "account_wallet_balance"
+
+
+class WalletTask(BaseModel):
+    wallet = models.ForeignKey(
+        Wallet,
+        on_delete=models.CASCADE,
+        related_name='wallet_tasks',
+        help_text=HELPER_TEXT['wtt_wallet_id']
+    )
+    transaction_code = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT['wtt_transaction_code']
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=WALLET_TASK_STATUS,
+        default="open",
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT['wtt_attemp']
+    )
+    attemp = models.PositiveIntegerField(default=0, help_text=HELPER_TEXT['wtt_status'])
+
+    def __str__(self):
+        return str(self.wallet.address)
+
+    class Meta:
+        db_table = "account_wallet_tasks"
+
+    @classmethod
+    def create_task(cls, transaction, wallet):
+        cls.objects.create(
+            transaction=transaction,
+            wallet=wallet,
+        )

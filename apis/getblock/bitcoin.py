@@ -1,9 +1,12 @@
 from django.conf import settings as app_settings
 import requests
 from decimal import Decimal
+from apis.getblock import BaseHandler
 
-class BTCHandler:
+
+class BTCHandler(BaseHandler):
     def __init__(self):
+        super().__init__()
         self.url = app_settings.GETBLOCK_BTC_BLOCKBOOK_ADDR
 
     def parsing_balance(self, response):

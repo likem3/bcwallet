@@ -3,12 +3,13 @@ from jsonrpcclient import request
 import requests
 import base58
 import binascii
+from apis.getblock import BaseHandler
 
 
-class TronHandler:
-    url = None
-
+class TronHandler(BaseHandler):
+    request_id = None
     def __init__(self):
+        super().__init__()
         self.url = app_settings.GETBLOCK_TRON_JRPC_ADDR
         self.request_id = 'getblock.io'
 

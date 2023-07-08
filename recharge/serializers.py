@@ -6,6 +6,8 @@ from bcwallet.settings import HELPER_TEXT
 from utils.handlers import handle_minimum_deposit_amount
 from decimal import Decimal
 from apis.addrbank.currency import Currency
+from account.tasks import create_wallet_task
+from django.db import transaction as model_transaction
 
 
 class DepositTransactionSerializer(serializers.ModelSerializer):
@@ -77,6 +79,7 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         attributs_data = WalletAttributSerializer(obj.wallet.attributs).data
         return attributs_data
 
+    @model_transaction.atomic
     def create(self, validated_data):
         query = {
             'account': self._account,
@@ -116,6 +119,8 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
             transaction = Transaction.create_deposit_transaction(
                 **query
             )
+
+            create_wallet_task.delay(transaction.code)
 
             return transaction
         except Exception as e:

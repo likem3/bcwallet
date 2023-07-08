@@ -1,94 +1,152 @@
 from celery import shared_task
-from bcwallet.settings import (
-    BLOCKCHAIN_NETWORK_MAP,
-    ENVIRONMENT_SETTING,
-    CRYPTOAPI_BASE_URL,
-    CRYPTOAPI_API_KEY,
-    CRYPTOAPI_MASTER_WALLET,
-)
-import requests
-import time
 from django.utils import timezone
-from account.models import Wallet, WalletBalance
-
+from datetime import timedelta
+from account.models import Wallet, WalletBalance, WalletTask
+from recharge.models import Transaction
+from django.db.models import OuterRef, Subquery, F, Case, When, CharField, Value
+from apis import Switcher
+from decimal import Decimal
+from django.db import transaction as app_transaction
 
 @shared_task
-def generate_random_number():
-    print("task run!!")
-
-
-@shared_task
-def update_wallets_tasks(wallet_balances={}):
-    wallets = Wallet.objects.filter(
-        status="active", account__status="active", address__in=wallet_balances.keys()
-    )
-
-    for wallet in wallets:
-        address = wallet.address
-
-        balance, _ = WalletBalance.objects.get_or_create(wallet=wallet)
-        balance_data = wallet_balances.get(address, {})
-
-        if not balance_data or not balance_data.get("confirmedBalance"):
-            continue
-
-        confirmed_balance = balance_data.get("confirmedBalance", {})
-        balance.amount = confirmed_balance.get("amount")
-        balance.unit = confirmed_balance.get("unit")
-        balance.created_timestamp = timezone.make_aware(
-            timezone.datetime.utcfromtimestamp(balance_data.get("createdTimestamp"))
+def create_wallet_task(transaction_code):
+    try:
+        transaction = Transaction.objects.get(code=transaction_code)
+        wallet = transaction.wallet
+        WalletTask.create_task(
+            wallet=wallet,
+            transaction_code=transaction.code,
         )
 
-        balance.save()
+    except Transaction.DoesNotExist:
+        print(f'{transaction_code} is invalid')
+        return {
+            'status': 'failed',
+            'msg': f'{transaction_code} is invalid'
+        }
 
+    except Exception as e:
+        print(str(e))
+        return {
+            'status': 'failed',
+            'msg': str(e)
+        }
 
 @shared_task
-def get_wallets_balances():
-    result_wallets = {}
-    blockchain_networks = {
-        blockchain: network_map["production"]
-        if ENVIRONMENT_SETTING == "production"
-        else network_map["development"]
-        for blockchain, network_map in BLOCKCHAIN_NETWORK_MAP.items()
-    }
+def get_update_wallet_balance_candidate():
+    try:
+        current_time = timezone.now()
+        threshold_time = current_time - timedelta(minutes=30)
 
-    for blockchain, network in blockchain_networks.items():
-        if not Wallet.objects.filter(
-            status="active",
-            account__status="active",
-            blockchain=blockchain,
-            network=network,
-        ).exists():
-            continue
+        last_balance_subquery = WalletBalance.objects.filter(
+            wallet_id=OuterRef('id')
+        ).order_by('-created_at').values('created_at')[:1]
 
-        url = "{}/wallet-as-a-service/wallets/{}/{}/{}/addresses".format(
-            CRYPTOAPI_BASE_URL,
-            CRYPTOAPI_MASTER_WALLET,
-            blockchain,
-            network
-        )
-        limit = 50
-        offset = 0
+        wallets = Wallet.objects.exclude(
+            wallet_tasks__status='open'
+        ).annotate(
+            last_balance_update=Subquery(last_balance_subquery)
+        ).filter(
+            last_balance_update__lte=threshold_time
+        ).distinct()
 
-        while True:
-            params = {"limit": limit, "offset": offset}
-            headers = {
-                "X-API-Key": CRYPTOAPI_API_KEY,
-                "Content-Type": "application/json",
+        if not wallets:
+            return {
+                'wallet_ids': []
             }
 
-            api_response = requests.get(url=url, headers=headers, params=params)
-            response_data = api_response.json().get("data")
-            response_items = response_data.get("items", [])
+        wallet_tasks = []
+        wallet_ids = []
 
-            if response_data and response_items:
-                for wallet in response_items:
-                    result_wallets[wallet["address"]] = wallet
+        for wallet in wallets:
+            wallet_ids.append(wallet.id)
+            wallet_tasks.append(
+                WalletTask(
+                    wallet=wallet
+                )
+            )
 
-            if len(response_items) < limit:
-                break
+        wallet_task_in = WalletTask.objects.filter(wallet_id__in=wallet_ids)
+        if wallet_task_in:
+            wallet_task_in.update(status='cencel')
 
-            offset += limit
-            time.sleep(0.3)
+        WalletTask.objects.bulk_create(
+            wallet_tasks
+        )
 
-    update_wallets_tasks.delay(wallet_balances=result_wallets)
+        return {
+            'wallet_ids': wallet_ids,
+        }
+
+    except Exception as e:
+        print(str(e))
+
+@shared_task
+@app_transaction.atomic
+def update_wallet_balance():
+    candidates = WalletTask.objects.filter(status='open').order_by('-created_at')[:10]
+    failed_wallet_ids = []
+    balance_update = []
+    affected_wallet_id = []
+    success_wallet_id = []
+    for candidate in candidates:
+        affected_wallet_id.append(candidate.wallet.id)
+        symbol = candidate.wallet.currency_symbol
+        std = candidate.wallet.currency_std
+        address = candidate.wallet.address
+
+        switcher = Switcher.handler(symbol=symbol, std=std)
+        handler = switcher()
+
+        try:
+            balance = handler.get_balance(address)
+        except Exception as e:
+            print(e)
+            failed_wallet_ids.append(candidate.wallet.id)
+            continue
+
+        query = {
+            'wallet': candidate.wallet,
+            'amount': Decimal(balance),
+            'unit': symbol
+        }
+
+        balance_obj_list = candidate.wallet.balance.order_by('-created_at')
+        if balance_obj_list:
+            balance_obj = balance_obj_list[0]
+            last_balance = balance_obj.amount if balance_obj.amount else 0
+            query['amount_change'] = Decimal(Decimal(balance) - Decimal(last_balance))
+            query['last_updated_at'] = balance_obj.updated_at
+        else:
+            query['amount_change'] = Decimal(balance)
+            query['last_updated_at'] = timezone.now()
+
+        balance_update.append(WalletBalance(
+            **query
+        ))
+        success_wallet_id.append(candidate.wallet.id)
+    
+    try:
+        WalletTask.objects.filter(wallet__id__in=failed_wallet_ids).update(
+            attemp=F('attemp') + 1,
+            status=Case(
+                When(attemp__gte=3, then=Value('fail')),
+                default=F('status'),
+                output_field=CharField()
+            )
+        )
+        WalletBalance.objects.bulk_create(
+            balance_update
+        )
+        WalletTask.objects.filter(wallet__id__in=success_wallet_id).update(status='success')
+
+        return {
+            'affected_wallet_id': affected_wallet_id,
+            'failed_wallet_id': failed_wallet_ids,
+            'success_wallet_id': success_wallet_id,
+        }
+    except Exception as e:
+        print(str(e))
+        return {
+            'status': 'task_failed'
+        }

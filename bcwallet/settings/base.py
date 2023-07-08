@@ -21,6 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_celery_beat',
+    'django_celery_results',
     'rest_framework',
     'drf_yasg',
     'drf_standardized_errors',

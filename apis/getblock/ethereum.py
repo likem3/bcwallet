@@ -1,12 +1,13 @@
 from django.conf import settings as app_settings
 from jsonrpcclient import request
 import requests
+from apis.getblock import BaseHandler
 
 
-class EthHandler:
-    url = None
-
+class EthHandler(BaseHandler):
+    request_id = None
     def __init__(self):
+        super().__init__()
         self.url = app_settings.GETBLOCK_ETHEREUM_JRPC_ADDR
         self.request_id = 'getblock.io'
 
