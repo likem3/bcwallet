@@ -89,6 +89,7 @@ def update_wallet_balance():
     balance_update = []
     affected_wallet_id = []
     success_wallet_id = []
+    transactions_candidate = {}
     for candidate in candidates:
         affected_wallet_id.append(candidate.wallet.id)
         symbol = candidate.wallet.currency_symbol
@@ -101,7 +102,7 @@ def update_wallet_balance():
         try:
             balance = handler.get_balance(address)
         except Exception as e:
-            print(e)
+            print(str(e))
             failed_wallet_ids.append(candidate.wallet.id)
             continue
 
@@ -121,9 +122,15 @@ def update_wallet_balance():
             query['amount_change'] = Decimal(balance)
             query['last_updated_at'] = timezone.now()
 
+
         balance_update.append(WalletBalance(
             **query
         ))
+
+        # Update transaction if wallet balance change same or bigger transaction amount
+        if candidate.transaction_code:
+            transactions_candidate[candidate.transaction_code] = query['amount_change']
+
         success_wallet_id.append(candidate.wallet.id)
     
     try:
@@ -140,13 +147,59 @@ def update_wallet_balance():
         )
         WalletTask.objects.filter(wallet__id__in=success_wallet_id).update(status='success')
 
+        # updating transaction success
+        update_transactions_status_success.delay(transactions_candidate)
+
         return {
             'affected_wallet_id': affected_wallet_id,
             'failed_wallet_id': failed_wallet_ids,
             'success_wallet_id': success_wallet_id,
+            'transactions_candidate': transactions_candidate,
         }
     except Exception as e:
         print(str(e))
         return {
             'status': 'task_failed'
         }
+
+
+@shared_task
+def update_transactions_status_success(transactions_data={}):
+    transactions = Transaction.objects.filter(
+        code__in=transactions_data.keys(),
+        status='pending'
+    )
+    trx_update_data = []
+    trx_ids_updated = []
+    if transactions:
+        for trx in transactions:
+            balance_in = transactions_data.get(trx.code, 0)
+            if balance_in and Decimal(balance_in) >= Decimal(trx.amount):
+                trx.status = 'completed'
+                trx_update_data.append(trx)
+                trx_update_data.append({
+                    trx.code: balance_in
+                })
+
+    if trx_update_data:
+        Transaction.objects.bulk_update(
+            trx_update_data
+        )
+    
+    return trx_ids_updated
+
+
+@shared_task
+def update_transaction_status_failed():
+    # Calculate the time threshold (30 minutes ago)
+    threshold = timezone.now() - timedelta(minutes=30)
+
+    num_affected = Transaction.objects.filter(
+        expired_at__lt=threshold, status='pending'
+    ).update(
+        status='failed'
+    )
+
+    return {
+        'total_trx_updated_to_fail': num_affected
+    }
