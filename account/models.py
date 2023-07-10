@@ -51,6 +51,7 @@ class Wallet(BaseModel):
     currency_symbol = models.CharField(max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"])
     currency_blockchain = models.CharField(max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_blockchain"])
     currency_std = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"])
+    currency_std = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_network"])
     address = models.CharField(
         unique=True, max_length=255, help_text=HELPER_TEXT["address"]
     )
@@ -96,6 +97,7 @@ class Wallet(BaseModel):
             query['currency_symbol'] = handler._currency['symbol']
             query['currency_blockchain'] = handler._currency['blockchain']
             query['currency_std'] = handler._currency['std']
+            query['network'] = handler._network
             query['status'] = status
 
             wallet_logo = LOGO_SETTINGS[query['currency_symbol']]

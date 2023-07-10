@@ -168,6 +168,7 @@ HELPER_TEXT = {
     "currency_symbol": "Related currency symbol used",
     "currency_blockchain": "Related currency blockchain used",
     "currency_std": "Related currency blockchain standard used",
+    "currency_network": "Network of the wallet currency",
     "blockchain": "Related blockchain that will be used",
     "network": f"Blockchain network \n{NETWORK_RULE}",
     "account": "Related account object",

@@ -6,6 +6,7 @@ class Address(BaseAddrBank):
     _address = None
     _label = None
     _currency = None
+    _network = None
     _json = None
 
     def __init__(self):
@@ -21,7 +22,12 @@ class Address(BaseAddrBank):
         if api_response.status_code not in [200, 201]:
             return
         
-        return api_response.json()       
+        return api_response.json()
+    
+    def get_currency_network(self, network={}):
+        if network and network.get('type'):
+            return network['type']
+        return 'mainnet'
 
     def create_address(self, currency_id, user_id):
         try:
@@ -33,6 +39,7 @@ class Address(BaseAddrBank):
             self._address = json_response['address']
             self._label = json_response['label']
             self._currency = json_response['currency']
+            self._network = self.get_currency_network(network=json_response.get('network'))
             self._json = {"status": True, "result": json_response}
 
 
