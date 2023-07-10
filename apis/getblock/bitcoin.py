@@ -8,6 +8,7 @@ class BTCHandler(BaseHandler):
     def __init__(self):
         super().__init__()
         self.url = app_settings.GETBLOCK_BTC_BLOCKBOOK_ADDR
+        self.url_test = app_settings.GETBLOCK_BTC_BLOCKBOOK_ADDR_TEST
 
     def parsing_balance(self, response):
         try:
@@ -21,6 +22,19 @@ class BTCHandler(BaseHandler):
 
     def get_balance(self, address):
         url = f"{self.url}v2/address/{address}"
+        params = {
+            'page': 1,
+            'pageSize': 1,
+            'details': 'basic',
+            'secondary': 'btc'
+        }
+
+        response = requests.get(url, params=params)
+
+        return self.parsing_balance(response)
+
+    def get_balance_test(self, address):
+        url = f"{self.url_test}v2/address/{address}"
         params = {
             'page': 1,
             'pageSize': 1,

@@ -8,6 +8,8 @@ from decimal import Decimal
 from apis.addrbank.currency import Currency
 from account.tasks import create_wallet_task
 from django.db import transaction as model_transaction
+from django.utils import timezone
+from datetime import timedelta
 
 
 class DepositTransactionSerializer(serializers.ModelSerializer):
@@ -120,12 +122,25 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
                 **query
             )
 
-            create_wallet_task.delay(transaction.code)
+            exec_time = timezone.now() + timedelta(minutes=3)
+            exp_time = timezone.now() + timedelta(minutes=10)
+            breakpoint()
+            create_wallet_task.apply_async(
+                args=(transaction.code,),
+                eta=exec_time,
+                expires=exp_time
+            )
 
             return transaction
         except Exception as e:
             print(str(e))
             raise serializers.ValidationError({'deposit': 'create deposit failed, server failed'})
+
+
+class NetworkSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+    type = serializers.CharField()
 
 
 class CurrencySerializer(serializers.Serializer):
@@ -134,3 +149,4 @@ class CurrencySerializer(serializers.Serializer):
     symbol = serializers.CharField()
     blockchain = serializers.CharField()
     std = serializers.CharField()
+    network = NetworkSerializer()

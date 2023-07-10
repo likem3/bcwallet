@@ -39,7 +39,7 @@ class Address(BaseAddrBank):
             self._address = json_response['address']
             self._label = json_response['label']
             self._currency = json_response['currency']
-            self._network = self.get_currency_network(network=json_response.get('network'))
+            self._network = self.get_currency_network(network=self._currency.get('network'))
             self._json = {"status": True, "result": json_response}
 
 

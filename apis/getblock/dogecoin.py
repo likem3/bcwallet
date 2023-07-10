@@ -7,6 +7,7 @@ class DOGEHandler(BaseHandler):
     def __init__(self):
         super().__init__()
         self.url = app_settings.BLOCKCHAIN_DOGE_ADDR
+        self.url_test = app_settings.BLOCKCHAIN_DOGE_ADDR_TEST
 
     def parsing_balance(self, address, response):
         try:
@@ -21,6 +22,12 @@ class DOGEHandler(BaseHandler):
 
     def get_balance(self, address):
         url = f"{self.url}{address}"
+        response = requests.get(url)
+
+        return self.parsing_balance(address, response)
+
+    def get_balance_test(self, address):
+        url = f"{self.url_test}{address}"
         response = requests.get(url)
 
         return self.parsing_balance(address, response)

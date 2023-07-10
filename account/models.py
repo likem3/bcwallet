@@ -51,7 +51,7 @@ class Wallet(BaseModel):
     currency_symbol = models.CharField(max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"])
     currency_blockchain = models.CharField(max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_blockchain"])
     currency_std = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"])
-    currency_std = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_network"])
+    network = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_network"])
     address = models.CharField(
         unique=True, max_length=255, help_text=HELPER_TEXT["address"]
     )
@@ -90,6 +90,8 @@ class Wallet(BaseModel):
                 currency_id=currency_id, user_id=user_id
             )
 
+            breakpoint()
+
             query['address'] = handler._address
             query['label'] = handler._label
             query['currency_id'] = handler._currency['id']
@@ -104,7 +106,6 @@ class Wallet(BaseModel):
 
             if handler._address and handler._label and handler._currency:
                 wallet = cls.objects.create(**query)
-
 
                 wallet_image_b64 = generate_qrcode_with_logo(
                     text=wallet.address, logo_path=wallet_logo
@@ -224,8 +225,8 @@ class WalletTask(BaseModel):
         db_table = "account_wallet_tasks"
 
     @classmethod
-    def create_task(cls, transaction, wallet):
+    def create_task(cls, wallet, transaction_code):
         cls.objects.create(
-            transaction=transaction,
             wallet=wallet,
+            transaction_code=transaction_code,
         )

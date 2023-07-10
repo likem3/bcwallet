@@ -9,6 +9,7 @@ class EthHandler(BaseHandler):
     def __init__(self):
         super().__init__()
         self.url = app_settings.GETBLOCK_ETHEREUM_JRPC_ADDR
+        self.url_test = app_settings.GETBLOCK_ETHEREUM_JRPC_ADDR_TEST
         self.request_id = 'getblock.io'
 
     def parsing_balance(self, response):
@@ -24,6 +25,21 @@ class EthHandler(BaseHandler):
             return
 
     def get_balance(self, address):
+        rpc_response = requests.post(
+            self.url,
+            json=request(
+                method="eth_getBalance",
+                id=self.request_id,
+                params=[
+                    address,
+                    'latest'
+                ]
+            )
+        )
+
+        return self.parsing_balance(rpc_response)
+
+    def get_balance_test(self, address):
         rpc_response = requests.post(
             self.url,
             json=request(

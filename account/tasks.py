@@ -95,12 +95,16 @@ def update_wallet_balance():
         symbol = candidate.wallet.currency_symbol
         std = candidate.wallet.currency_std
         address = candidate.wallet.address
+        network = candidate.wallet.network
 
         switcher = Switcher.handler(symbol=symbol, std=std)
         handler = switcher()
 
         try:
-            balance = handler.get_balance(address)
+            if network == 'mainnet':
+                balance = handler.get_balance(address)
+            else:
+                balance = handler.get_balance_test(address)
         except Exception as e:
             print(str(e))
             failed_wallet_ids.append(candidate.wallet.id)
@@ -183,7 +187,8 @@ def update_transactions_status_success(transactions_data={}):
 
     if trx_update_data:
         Transaction.objects.bulk_update(
-            trx_update_data
+            trx_update_data,
+            ['status']
         )
     
     return trx_ids_updated
