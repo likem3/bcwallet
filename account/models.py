@@ -90,8 +90,6 @@ class Wallet(BaseModel):
                 currency_id=currency_id, user_id=user_id
             )
 
-            breakpoint()
-
             query['address'] = handler._address
             query['label'] = handler._label
             query['currency_id'] = handler._currency['id']

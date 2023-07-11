@@ -122,9 +122,8 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
                 **query
             )
 
-            exec_time = timezone.now() + timedelta(minutes=3)
-            exp_time = timezone.now() + timedelta(minutes=10)
-            breakpoint()
+            exec_time = timezone.now() + timedelta(minutes=1)
+            exp_time = timezone.now() + timedelta(minutes=3)
             create_wallet_task.apply_async(
                 args=(transaction.code,),
                 eta=exec_time,

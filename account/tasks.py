@@ -85,17 +85,30 @@ def get_update_wallet_balance_candidate():
 @app_transaction.atomic
 def update_wallet_balance():
     candidates = WalletTask.objects.filter(status='open').order_by('-created_at')[:10]
-    failed_wallet_ids = []
+
+    task_update = []
     balance_update = []
     affected_wallet_id = []
-    success_wallet_id = []
+    success_task_id = []
     transactions_candidate = {}
+    balance_update_created_at = []
+
     for candidate in candidates:
         affected_wallet_id.append(candidate.wallet.id)
-        symbol = candidate.wallet.currency_symbol
-        std = candidate.wallet.currency_std
-        address = candidate.wallet.address
-        network = candidate.wallet.network
+
+        wallet = candidate.wallet
+        symbol = wallet.currency_symbol
+        std = wallet.currency_std
+        address = wallet.address
+        network = wallet.network
+
+        try:
+            last_balances = wallet.balance
+            last_balance = last_balances.latest('created_at')
+            last_balance_amount = round(Decimal(last_balance.amount), 10)
+        except WalletBalance.DoesNotExist:
+            last_balance = None
+            last_balance_amount = round(Decimal(0), 10)
 
         switcher = Switcher.handler(symbol=symbol, std=std)
         handler = switcher()
@@ -105,27 +118,46 @@ def update_wallet_balance():
                 balance = handler.get_balance(address)
             else:
                 balance = handler.get_balance_test(address)
+
         except Exception as e:
+            candidate.attemp += 1
+            candidate.status = 'fail' if candidate.attemp >= 3 else 'open'
+            task_update.append(candidate)
             print(str(e))
-            failed_wallet_ids.append(candidate.wallet.id)
+            continue
+
+        balance = round(Decimal(balance), 10)
+
+        print(f'lb: {last_balance_amount}\nbn:{balance}')
+        if last_balance_amount == balance:
+            if not candidate.transaction_code or candidate.attemp > 3:
+                candidate.status = 'cancel'
+                candidate.attemp = candidate.attemp
+
+                if last_balance:
+                    last_balance.created_at = timezone.now()
+                    last_balance.updated_at = timezone.now()
+                    balance_update_created_at.append(last_balance)
+
+            else:
+                candidate.status = candidate.status
+                candidate.attemp += 1
+
+            task_update.append(candidate)
             continue
 
         query = {
             'wallet': candidate.wallet,
-            'amount': Decimal(balance),
+            'amount': balance,
             'unit': symbol
         }
 
-        balance_obj_list = candidate.wallet.balance.order_by('-created_at')
-        if balance_obj_list:
-            balance_obj = balance_obj_list[0]
-            last_balance = balance_obj.amount if balance_obj.amount else 0
-            query['amount_change'] = Decimal(Decimal(balance) - Decimal(last_balance))
-            query['last_updated_at'] = balance_obj.updated_at
+        if last_balance:
+            query['amount_change'] = Decimal(balance - last_balance_amount)
+            query['last_updated_at'] = last_balance.updated_at
         else:
-            query['amount_change'] = Decimal(balance)
+            query['amount_change'] = balance
             query['last_updated_at'] = timezone.now()
-
 
         balance_update.append(WalletBalance(
             **query
@@ -135,29 +167,36 @@ def update_wallet_balance():
         if candidate.transaction_code:
             transactions_candidate[candidate.transaction_code] = query['amount_change']
 
-        success_wallet_id.append(candidate.wallet.id)
+        success_task_id.append(candidate.id)
     
     try:
-        WalletTask.objects.filter(wallet__id__in=failed_wallet_ids).update(
-            attemp=F('attemp') + 1,
-            status=Case(
-                When(attemp__gte=3, then=Value('fail')),
-                default=F('status'),
-                output_field=CharField()
+        if task_update:
+            WalletTask.objects.bulk_update(
+                task_update,
+                ['attemp', 'status', 'created_at']
             )
-        )
-        WalletBalance.objects.bulk_create(
-            balance_update
-        )
-        WalletTask.objects.filter(wallet__id__in=success_wallet_id).update(status='success')
+
+        if balance_update:
+            WalletBalance.objects.bulk_create(
+                balance_update
+            )
+
+        if success_task_id:
+            WalletTask.objects.filter(id__in=success_task_id).update(status='success')
 
         # updating transaction success
-        update_transactions_status_success.delay(transactions_candidate)
+        if transactions_candidate:
+            update_transactions_status_success.delay(transactions_candidate)
+
+        if balance_update_created_at:
+            WalletBalance.objects.bulk_update(
+                balance_update_created_at,
+                ['created_at', 'updated_at']
+            )
 
         return {
             'affected_wallet_id': affected_wallet_id,
-            'failed_wallet_id': failed_wallet_ids,
-            'success_wallet_id': success_wallet_id,
+            'success_task_id': success_task_id,
             'transactions_candidate': transactions_candidate,
         }
     except Exception as e:
@@ -181,7 +220,7 @@ def update_transactions_status_success(transactions_data={}):
             if balance_in and Decimal(balance_in) >= Decimal(trx.amount):
                 trx.status = 'completed'
                 trx_update_data.append(trx)
-                trx_update_data.append({
+                trx_ids_updated.append({
                     trx.code: balance_in
                 })
 

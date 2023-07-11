@@ -41,7 +41,7 @@ class EthHandler(BaseHandler):
 
     def get_balance_test(self, address):
         rpc_response = requests.post(
-            self.url,
+            self.url_test,
             json=request(
                 method="eth_getBalance",
                 id=self.request_id,
