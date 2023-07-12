@@ -1,7 +1,7 @@
 from django.conf import settings as app_settings
 import requests
 from decimal import Decimal
-from apis.getblock import BaseHandler
+from apis.handlers import BaseHandler
 
 
 class BTCHandler(BaseHandler):

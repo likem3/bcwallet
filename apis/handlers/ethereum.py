@@ -1,7 +1,7 @@
 from django.conf import settings as app_settings
 from jsonrpcclient import request
 import requests
-from apis.getblock import BaseHandler
+from apis.handlers import BaseHandler
 
 
 class EthHandler(BaseHandler):
