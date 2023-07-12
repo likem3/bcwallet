@@ -119,6 +119,9 @@ def update_wallet_balance():
             else:
                 balance = handler.get_balance_test(address)
 
+            if balance is None:
+                raise Exception("Invalid fetch wallet balance")
+
         except Exception as e:
             candidate.attemp += 1
             candidate.status = 'fail' if candidate.attemp >= 3 else 'open'
@@ -130,7 +133,7 @@ def update_wallet_balance():
 
         print(f'lb: {last_balance_amount}\nbn:{balance}')
         if last_balance_amount == balance:
-            if not candidate.transaction_code or candidate.attemp > 3:
+            if not candidate.transaction_code and candidate.attemp > 3:
                 candidate.status = 'cancel'
                 candidate.attemp = candidate.attemp
 

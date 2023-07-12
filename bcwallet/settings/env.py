@@ -44,7 +44,7 @@ GETBLOCK_TRON_JRPC_ADDR = f'https://trx.getblock.io/{GETBLOCK_API_KEY}/mainnet/f
 GETBLOCK_TRON_JRPC_ADDR_TEST = f'https://trx.getblock.io/{GETBLOCK_API_KEY}/testnet/fullnode/jsonrpc'
 
 GETBLOCK_BTC_BLOCKBOOK_ADDR = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/mainnet/blockbook/api/'
-GETBLOCK_BTC_BLOCKBOOK_ADDR_TEST = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/testnet/'
+GETBLOCK_BTC_BLOCKBOOK_ADDR_TEST = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/testnet/blockbook/api/'
 
 BLOCKCHAIN_DOGE_ADDR = 'https://api.blockchair.com/dogecoin/dashboards/address/'
 BLOCKCHAIN_DOGE_ADDR_TEST = 'https://api.blockchair.com/dogecoin/dashboards/address/'
