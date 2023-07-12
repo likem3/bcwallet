@@ -32,17 +32,18 @@ NETWORK_OPTIONS = (
 )
 
 LOGO_SETTINGS = {
-    'bitcoin'               : '/storages/icons/btc.png',
-    'bitcoin-cash'          : '/storages/icons/bitcoin-cash.png',
-    'litecoin'              : '/storages/icons/litecoin.png',
-    'dogecoin'              : '/storages/icons/dogecoin.png',
-    'dash'                  : '/storages/icons/dash.png',
-    'ethereum'              : '/storages/icons/ethereum.png',
-    'ethereum-classic'      : '/storages/icons/etherum-classic.png',
-    'xrp'                   : '/storages/icons/xrp.png',
-    'zcash'                 : '/storages/icons/zcash.png',
-    'binance-smart-chain'   : '/storages/icons/binance-smart-chain.png',
-    'tron'                  : '/storages/icons/tron.png'
+    'BTC' : '/storages/icons/btc.png',
+    'BCH' : '/storages/icons/bitcoin-cash.png',
+    'LTC' : '/storages/icons/litecoin.png',
+    'DOGE' : '/storages/icons/dogecoin.png',
+    'DASH' : '/storages/icons/dash.png',
+    'ETH' : '/storages/icons/ethereum.png',
+    'ETC' : '/storages/icons/etherum-classic.png',
+    'XRP' : '/storages/icons/xrp.png',
+    'ZEC' : '/storages/icons/zcash.png',
+    'BNB' : '/storages/icons/binance-smart-chain.png',
+    'TRX' : '/storages/icons/tron.png',
+    'USDT' : '/storages/icons/usdt.png',
 }
 
 BLOCKCHAIN_CODE = {
@@ -115,17 +116,18 @@ BLOCKCHAIN_NETWORK_MAP = {
 }
 
 BLOCKCHAIN_MINIMUM_DEPOSIT_MAP = {
-    'bitcoin' : '0.0001',
-    'bitcoin-cash' : '0.01',
-    'litecoin' : '0.01',
-    'dogecoin' : '20.00',
-    'dash' : '0.1',
-    'ethereum' : '0.001',
-    'ethereum-classic' : '0.1',
-    'xrp' : '4.00',
-    'zcash' : '0.1',
-    'binance-smart-chain' : '0.01',
-    'tron' : '0.01',
+    'BTC' : '0.0001',
+    'BCH' : '0.01',
+    'LTC' : '0.01',
+    'DOGE' : '20.00',
+    'DASH' : '0.1',
+    'ETH' : '0.001',
+    'ETC' : '0.1',
+    'XRP' : '4.00',
+    'ZEC' : '0.1',
+    'BNB' : '0.01',
+    'TRX' : '0.01',
+    'USDT' : '0.001',
 }
 
 TRANSACTION_STATUS = (
@@ -141,6 +143,13 @@ TRANSACTION_TYPE_OPTION = (
     ('withdrawal', "Withdrawal"),
 )
 
+WALLET_TASK_STATUS = (
+    ('open', 'Open'),
+    ('success', 'Success'),
+    ('fail', 'Fail'),
+    ('cencel', 'Cancel'),
+)
+
 NETWORK_RULE = """
 Network rule:
 In a production env network value "mainnet" for all blockchain.
@@ -154,6 +163,12 @@ HELPER_TEXT = {
     "account_email": "Email of the registered user",
     "account_username": "Username of the registered user",
     "user_id": "ID of the associated user (source: account.user_id)",
+    "currency_id": "Related blockchain that will be used",
+    "currency_name": "Related currency name used",
+    "currency_symbol": "Related currency symbol used",
+    "currency_blockchain": "Related currency blockchain used",
+    "currency_std": "Related currency blockchain standard used",
+    "currency_network": "Network of the wallet currency",
     "blockchain": "Related blockchain that will be used",
     "network": f"Blockchain network \n{NETWORK_RULE}",
     "account": "Related account object",
@@ -179,6 +194,10 @@ HELPER_TEXT = {
     "trx_cancel_reason": "Reason why the transaction becomes canceled",
     "trx_proof_of_payment": "Image in base64 format of the transaction receipt",
     "trx_expired_at": "The expiration of the transaction before it gets ignored",
-    "trx_receipt_id": "The transaction hash (txid)",
+    "trx_transaction_id": "The transaction hash (txid)",
     "trx_type": "The transaction type",
+    "wtt_transaction_code": "Transaction code related",
+    "wtt_wallet_id": "Wallet id related",
+    "wtt_attemp": "Number of attemp running task",
+    "wtt_status": "Status task",
 }
