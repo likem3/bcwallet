@@ -50,48 +50,54 @@ class WalletBalanceSerializer(serializers.ModelSerializer):
         fields = [
             "amount",
             "unit",
+            "created_at",
             "updated_at",
         ]
 
 
 class WalletSerializer(serializers.ModelSerializer):
     attributs = WalletAttributSerializer(read_only=True)
-    balance = WalletBalanceSerializer(read_only=True)
+    balance = WalletBalanceSerializer(many=False, read_only=True)
 
     class Meta:
         model = Wallet
-        fields = Wallet.get_fields(extras=["attributs", "balance"])
-        read_only_fields = Wallet.get_fields(excludes=["user_id", "blockchain"])
+        fields = model.get_fields(excludes=['wallet_transactions', 'wallet_tasks'], extras=["attributs", "balance"])
+        read_only_fields = Wallet.get_fields(excludes=["user_id", "currency_id"])
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if instance.balance.exists():
+            latest_balance = instance.balance.latest('created_at')
+            representation['balance'] = WalletBalanceSerializer(latest_balance).data
+        else:
+            representation['balance'] = None
+        return representation
 
     def validate(self, data):
-        breakpoint()
-        blockchain, network = handle_blockchain_network(data["blockchain"])
+        # blockchain, network = handle_blockchain_network(data["blockchain"])
+        currency_id = data['currency_id']
 
         if not Account.objects.filter(
             user_id=data["user_id"], status="active"
         ).exists():
             raise serializers.ValidationError("invalid user id")
 
-        if Wallet.objects.filter(
-            user_id=data["user_id"],
-            blockchain=blockchain,
-            network=network,
-        ).exists():
-            raise serializers.ValidationError(
-                "wallet with specific blockhain and network already created"
-            )
+        # TODO add validation for currency_id inputed
+
         return data
 
     def create(self, validated_data):
         account = Account.objects.get(user_id=validated_data["user_id"])
-        _, network = handle_blockchain_network(validated_data["blockchain"])
-
         try:
-            return Wallet.create_user_wallet(
+            wallet = Wallet.create_user_wallet(
                 account=account,
-                network=network,
                 **validated_data,
             )
+
+            if not wallet:
+                raise serializers.ValidationError({'creating': 'Server error!'})
+            
+            return wallet
 
         except Exception as e:
             raise ParseError(f"error {e}")
