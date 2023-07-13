@@ -48,3 +48,10 @@ GETBLOCK_BTC_BLOCKBOOK_ADDR_TEST = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/
 
 BLOCKCHAIN_DOGE_ADDR = 'https://api.blockchair.com/dogecoin/dashboards/address/'
 BLOCKCHAIN_DOGE_ADDR_TEST = 'https://api.blockchair.com/dogecoin/dashboards/address/'
+
+TRONGRID_USDT_ADDR = 'https://api.trongrid.io/v1/'
+TRONGRID_USDT_ADDR_TEST = 'https://nile.trongrid.io/v1/'
+USDT_CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'
+USDT_CONTRACT_ADDRESS_NILE = 'TXYZopYRdj2D9XRtbG411XZZ3kM5VkAeBf'
+
+TRONGRID_API_KEY = os.getenv('TRONGRID_API_KEY')
