@@ -34,7 +34,7 @@ class TransactionListByUserIDView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(account__status="active")
     serializer_class = DepositTransactionSerializer
-    lookup_url_kwarg = 'user_id'
+    lookup_url_kwarg = "user_id"
 
     def get_queryset(self):
         user_id = self.kwargs.get(self.lookup_url_kwarg)
@@ -43,7 +43,6 @@ class TransactionListByUserIDView(generics.ListAPIView):
 
 
 class CurrencyListClass(APIView):
-
     def get(self, request):
         currency = Currency()
         curencies = currency.get_currencies()
@@ -52,7 +51,10 @@ class CurrencyListClass(APIView):
             serializer.is_valid()
 
             return Response(serializer.data, status=200)
-        
+
         except Exception as e:
             print(str(e))
-            return Response({"error": "Internal server error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": "Internal server error"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

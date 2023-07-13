@@ -8,11 +8,12 @@ from apis.handlers import BaseHandler
 
 class TronHandler(BaseHandler):
     request_id = None
+
     def __init__(self):
         super().__init__()
         self.url = app_settings.GETBLOCK_TRON_JRPC_ADDR
         self.url_test = app_settings.GETBLOCK_TRON_JRPC_ADDR_TEST
-        self.request_id = 'getblock.io'
+        self.request_id = "getblock.io"
 
     def addres_to_hex(self, address):
         decoded = base58.b58decode(address)
@@ -22,13 +23,14 @@ class TronHandler(BaseHandler):
     def parsing_balance(self, response):
         try:
             json_response = response.json()
-            amount_hex = json_response.get('result')
+            amount_hex = json_response.get("result")
 
             decimal_value = int(amount_hex, 16)
             eth_value = decimal_value / 10**6
 
             return eth_value
-        except:
+        except Exception as e:
+            print(str(e))
             return
 
     def get_balance(self, address):
@@ -37,11 +39,8 @@ class TronHandler(BaseHandler):
             json=request(
                 method="eth_getBalance",
                 id=self.request_id,
-                params=[
-                    self.addres_to_hex(address),
-                    'latest'
-                ]
-            )
+                params=[self.addres_to_hex(address), "latest"],
+            ),
         )
 
         return self.parsing_balance(rpc_response)
@@ -52,11 +51,8 @@ class TronHandler(BaseHandler):
             json=request(
                 method="eth_getBalance",
                 id=self.request_id,
-                params=[
-                    self.addres_to_hex(address),
-                    'latest'
-                ]
-            )
+                params=[self.addres_to_hex(address), "latest"],
+            ),
         )
 
         return self.parsing_balance(rpc_response)

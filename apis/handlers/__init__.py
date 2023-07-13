@@ -7,9 +7,8 @@ class BaseHandler:
 
     def get_balance(self, address):
         raise NotImplementedError("Subclasses must implement get_balance() method.")
-    
+
     def get_balance_test(self, address):
-        raise NotImplementedError("Subclasses must implement get_balance_test() method.")
-
-
-
+        raise NotImplementedError(
+            "Subclasses must implement get_balance_test() method."
+        )

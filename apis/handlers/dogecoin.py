@@ -3,11 +3,6 @@ import requests
 from decimal import Decimal
 from apis.handlers import BaseHandler
 
-from django.conf import settings as app_settings
-import requests
-from decimal import Decimal
-from apis.handlers import BaseHandler
-
 
 class DOGEHandler(BaseHandler):
     def __init__(self):
@@ -18,8 +13,8 @@ class DOGEHandler(BaseHandler):
     def parsing_balance(self, response):
         try:
             resp_json = response.json()
-            balance_sts = Decimal(resp_json['balance'])
-            return  balance_sts / 100000000
+            balance_sts = Decimal(resp_json["balance"])
+            return balance_sts / 100000000
 
         except Exception as e:
             print(str(e))
@@ -27,12 +22,7 @@ class DOGEHandler(BaseHandler):
 
     def get_balance(self, address):
         url = f"{self.url}v2/address/{address}"
-        params = {
-            'page': 1,
-            'pageSize': 1,
-            'details': 'basic',
-            'secondary': 'ltc'
-        }
+        params = {"page": 1, "pageSize": 1, "details": "basic", "secondary": "ltc"}
 
         response = requests.get(url, params=params)
 
@@ -40,12 +30,7 @@ class DOGEHandler(BaseHandler):
 
     def get_balance_test(self, address):
         url = f"{self.url_test}v2/address/{address}"
-        params = {
-            'page': 1,
-            'pageSize': 1,
-            'details': 'basic',
-            'secondary': 'ltc'
-        }
+        params = {"page": 1, "pageSize": 1, "details": "basic", "secondary": "ltc"}
 
         response = requests.get(url, params=params)
 
@@ -61,8 +46,8 @@ class DOGEHandlerBlockChair(BaseHandler):
     def parsing_balance(self, address, response):
         try:
             resp_json = response.json()
-            data = resp_json['data']
-            balance_int = data[address]['address']['balance']
+            data = resp_json["data"]
+            balance_int = data[address]["address"]["balance"]
             balance_dcm = Decimal(balance_int)
             return balance_dcm / 100000000
         except Exception as e:

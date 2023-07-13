@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 from account.serializers import WalletSerializer
-from bcwallet.settings import HELPER_TEXT, BLOCKCHAIN_OPTIONS
+from bcwallet.settings import HELPER_TEXT
 from rest_framework import status
 
 create_wallet_schema = {

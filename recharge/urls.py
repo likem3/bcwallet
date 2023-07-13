@@ -16,9 +16,5 @@ urlpatterns = [
         TransactionListByUserIDView.as_view(),
         name="user-transaction-list",
     ),
-    path(
-        'currencies/',
-        CurrencyListClass.as_view(),
-        name="currency-list"
-    ),
+    path("currencies/", CurrencyListClass.as_view(), name="currency-list"),
 ]
