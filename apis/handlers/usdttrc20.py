@@ -27,8 +27,6 @@ class USDTTRC20Handler(BaseHandler):
             trc20_obj = {k: v for item in trc_objs for k, v in item.items()}
             balance = trc20_obj.get(contract_address, '0')
 
-            breakpoint()
-
             return Decimal(balance)/1000000
 
         except Exception as e:
