@@ -43,7 +43,7 @@ def get_update_wallet_balance_candidate():
         ).order_by('-created_at').values('created_at')[:1]
 
         wallets = Wallet.objects.exclude(
-            wallet_tasks__status='open'
+            wallet_tasks__status__in=['open', 'fail', 'success']
         ).annotate(
             last_balance_update=Subquery(last_balance_subquery)
         ).filter(
@@ -123,9 +123,10 @@ def update_wallet_balance():
                 raise Exception("Invalid fetch wallet balance")
 
         except Exception as e:
-            candidate.attemp += 1
-            candidate.status = 'fail' if candidate.attemp >= 3 else 'open'
-            task_update.append(candidate)
+            if not candidate.transaction_code:
+                candidate.attemp += 1
+                candidate.status = 'fail' if candidate.attemp >= 3 else 'open'
+                task_update.append(candidate)
             print(str(e))
             continue
 

@@ -1,7 +1,8 @@
-from apis.getblock.bitcoin import BTCHandler
-from apis.getblock.ethereum import EthHandler
-from apis.getblock.tron import TronHandler
-from apis.getblock.dogecoin import DOGEHandler
+from apis.handlers.bitcoin import BTCHandler
+from apis.handlers.ethereum import EthHandler
+from apis.handlers.tron import TronHandler
+from apis.handlers.dogecoin import DOGEHandler
+from apis.handlers.usdttrc20 import USDTTRC20Handler
 
 class Switcher:
     _handler = None
@@ -10,7 +11,7 @@ class Switcher:
         'ETH': EthHandler,
         'TRX': TronHandler,
         'DOGE': DOGEHandler,
-        'USDTTRC20': TronHandler
+        'USDTTRC20': USDTTRC20Handler,
     }
     
     @classmethod
