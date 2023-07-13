@@ -46,8 +46,14 @@ GETBLOCK_TRON_JRPC_ADDR_TEST = f'https://trx.getblock.io/{GETBLOCK_API_KEY}/test
 GETBLOCK_BTC_BLOCKBOOK_ADDR = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/mainnet/blockbook/api/'
 GETBLOCK_BTC_BLOCKBOOK_ADDR_TEST = f'https://btc.getblock.io/{GETBLOCK_API_KEY}/testnet/blockbook/api/'
 
-BLOCKCHAIN_DOGE_ADDR = 'https://api.blockchair.com/dogecoin/dashboards/address/'
-BLOCKCHAIN_DOGE_ADDR_TEST = 'https://api.blockchair.com/dogecoin/dashboards/address/'
+BLOCKCHAIR_DOGECOIN_ADDR = 'https://api.blockchair.com/dogecoin/dashboards/address/'
+BLOCKCHAIR_DOGECOIN_ADDR_TEST = 'https://api.blockchair.com/dogecoin/dashboards/address/'
+
+GETBLOCK_DOGECOIN_BLOCKBOOK_ADDR = f'https://doge.getblock.io/{GETBLOCK_API_KEY}/mainnet/blockbook/api/'
+GETBLOCK_DOGECOIN_BLOCKBOOK_ADDR_TEST = ''
+
+GETBLOCK_LITECOIN_BLOCKBOOK_ADDR = f'https://ltc.getblock.io/{GETBLOCK_API_KEY}/mainnet/blockbook/api/'
+GETBLOCK_LITECOIN_BLOCKBOOK_ADDR_TEST = ''
 
 TRONGRID_USDT_ADDR = 'https://api.trongrid.io/v1/'
 TRONGRID_USDT_ADDR_TEST = 'https://nile.trongrid.io/v1/'

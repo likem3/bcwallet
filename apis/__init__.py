@@ -3,6 +3,7 @@ from apis.handlers.ethereum import EthHandler
 from apis.handlers.tron import TronHandler
 from apis.handlers.dogecoin import DOGEHandler
 from apis.handlers.usdttrc20 import USDTTRC20Handler
+from apis.handlers.litecoin import LTCHandler
 
 class Switcher:
     _handler = None
@@ -12,6 +13,7 @@ class Switcher:
         'TRX': TronHandler,
         'DOGE': DOGEHandler,
         'USDTTRC20': USDTTRC20Handler,
+        'LTC': LTCHandler,
     }
     
     @classmethod
