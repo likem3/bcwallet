@@ -124,7 +124,7 @@ def update_wallet_balance():
 
         print(f"lb: {last_balance_amount}\nbn:{balance}")
         if last_balance_amount == balance:
-            if not candidate.transaction_code and candidate.attemp > 3:
+            if not candidate.transaction_code and balance:
                 candidate.status = "cancel"
                 candidate.attemp = candidate.attemp
 
