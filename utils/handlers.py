@@ -8,8 +8,6 @@ from bcwallet.settings import (
     BASE_DIR,
     BLOCKCHAIN_NETWORK_MAP,
     ENVIRONMENT_SETTING,
-    NETWORK_CODE,
-    BLOCKCHAIN_CODE,
     BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
 )
 from decimal import Decimal

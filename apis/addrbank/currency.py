@@ -1,8 +1,8 @@
 from apis.addrbank import BaseAddrBank
 import requests
 
-class Currency(BaseAddrBank):
 
+class Currency(BaseAddrBank):
     def __init__(self):
         super(Currency, self).__init__()
 
@@ -14,9 +14,10 @@ class Currency(BaseAddrBank):
                 return
             else:
                 return api_response.json()
-        except:
+        except Exception as e:
+            print(str(e))
             return
-        
+
     def get_currency_detail(self, id):
         url = f"{self.base_url}currencies/{id}/"
         try:
@@ -25,5 +26,6 @@ class Currency(BaseAddrBank):
                 return
             else:
                 return api_response.json()
-        except:
+        except Exception as e:
+            print(str(e))
             return

@@ -5,17 +5,18 @@ from apis.handlers.dogecoin import DOGEHandler
 from apis.handlers.usdttrc20 import USDTTRC20Handler
 from apis.handlers.litecoin import LTCHandler
 
+
 class Switcher:
     _handler = None
     _handler_dict = {
-        'BTC': BTCHandler,
-        'ETH': EthHandler,
-        'TRX': TronHandler,
-        'DOGE': DOGEHandler,
-        'USDTTRC20': USDTTRC20Handler,
-        'LTC': LTCHandler,
+        "BTC": BTCHandler,
+        "ETH": EthHandler,
+        "TRX": TronHandler,
+        "DOGE": DOGEHandler,
+        "USDTTRC20": USDTTRC20Handler,
+        "LTC": LTCHandler,
     }
-    
+
     @classmethod
     def handler(cls, symbol, std=None):
         key = f"{symbol}{std if std else ''}"

@@ -2,7 +2,6 @@ from account.models import Account, Wallet, WalletAttribut, WalletBalance
 from rest_framework import serializers
 import uuid
 from rest_framework.exceptions import ParseError
-from utils.handlers import handle_blockchain_network
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -61,22 +60,23 @@ class WalletSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Wallet
-        fields = model.get_fields(excludes=['wallet_transactions', 'wallet_tasks'], extras=["attributs", "balance"])
+        fields = model.get_fields(
+            excludes=["wallet_transactions", "wallet_tasks"],
+            extras=["attributs", "balance"],
+        )
         read_only_fields = Wallet.get_fields(excludes=["user_id", "currency_id"])
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if instance.balance.exists():
-            latest_balance = instance.balance.latest('created_at')
-            representation['balance'] = WalletBalanceSerializer(latest_balance).data
+            latest_balance = instance.balance.latest("created_at")
+            representation["balance"] = WalletBalanceSerializer(latest_balance).data
         else:
-            representation['balance'] = None
+            representation["balance"] = None
         return representation
 
     def validate(self, data):
         # blockchain, network = handle_blockchain_network(data["blockchain"])
-        currency_id = data['currency_id']
-
         if not Account.objects.filter(
             user_id=data["user_id"], status="active"
         ).exists():
@@ -95,8 +95,8 @@ class WalletSerializer(serializers.ModelSerializer):
             )
 
             if not wallet:
-                raise serializers.ValidationError({'creating': 'Server error!'})
-            
+                raise serializers.ValidationError({"creating": "Server error!"})
+
             return wallet
 
         except Exception as e:

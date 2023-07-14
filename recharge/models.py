@@ -58,9 +58,7 @@ class Transaction(ExtraBaseModel):
         help_text=HELPER_TEXT["trx_to_currency"],
     )
     user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
-    currency_id = models.PositiveIntegerField(
-        help_text=HELPER_TEXT["currency_id"]
-    )
+    currency_id = models.PositiveIntegerField(help_text=HELPER_TEXT["currency_id"])
     currency_name = models.CharField(
         max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_name"]
     )
@@ -68,7 +66,10 @@ class Transaction(ExtraBaseModel):
         max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"]
     )
     currency_blockchain = models.CharField(
-        max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_blockchain"]
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["currency_blockchain"],
     )
     currency_std = models.CharField(
         max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"]
@@ -135,29 +136,29 @@ class Transaction(ExtraBaseModel):
         currency_symbol,
         currency_blockchain,
         currency_std,
-        transaction_id
+        transaction_id,
     ):
         query = {
-            'code': handle_transaction_code(wallet.currency_symbol, account.user_id, "DP"),
-            'account': account,
-            'wallet': wallet,
-            'to_address': wallet.address,
-            'from_currency': wallet.attributs.symbol,
-            'to_currency': wallet.attributs.symbol,
-            'user_id': user_id,
-            'currency_id': currency_id,
-            'currency_name': currency_name,
-            'currency_symbol': currency_symbol,
-            'currency_blockchain': currency_blockchain,
-            'currency_std': currency_std,
-            'amount': amount,
-            'transaction_id': transaction_id,
-            'type': 'deposit',
-            'expired_at': (timezone.now() + timedelta(minutes=30)),
+            "code": handle_transaction_code(
+                wallet.currency_symbol, account.user_id, "DP"
+            ),
+            "account": account,
+            "wallet": wallet,
+            "to_address": wallet.address,
+            "from_currency": wallet.attributs.symbol,
+            "to_currency": wallet.attributs.symbol,
+            "user_id": user_id,
+            "currency_id": currency_id,
+            "currency_name": currency_name,
+            "currency_symbol": currency_symbol,
+            "currency_blockchain": currency_blockchain,
+            "currency_std": currency_std,
+            "amount": amount,
+            "transaction_id": transaction_id,
+            "type": "deposit",
+            "expired_at": (timezone.now() + timedelta(minutes=30)),
         }
-        trx = Transaction.objects.create(
-            **query
-        )
+        trx = Transaction.objects.create(**query)
 
         return trx
 
