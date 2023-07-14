@@ -6,7 +6,7 @@ from bcwallet.settings import (
     LOGO_SETTINGS,
     STATUS_CHOICES_MODEL,
     HELPER_TEXT,
-    WALLET_TASK_STATUS
+    WALLET_TASK_STATUS,
 )
 from django.db import transaction as app_transaction
 
@@ -47,11 +47,24 @@ class Wallet(BaseModel):
     )
     user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
     currency_id = models.PositiveIntegerField(help_text=HELPER_TEXT["currency_id"])
-    currency_name = models.CharField(max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_name"])
-    currency_symbol = models.CharField(max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"])
-    currency_blockchain = models.CharField(max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_blockchain"])
-    currency_std = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"])
-    network = models.CharField(max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_network"])
+    currency_name = models.CharField(
+        max_length=50, null=True, blank=True, help_text=HELPER_TEXT["currency_name"]
+    )
+    currency_symbol = models.CharField(
+        max_length=10, null=True, blank=True, help_text=HELPER_TEXT["currency_symbol"]
+    )
+    currency_blockchain = models.CharField(
+        max_length=50,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["currency_blockchain"],
+    )
+    currency_std = models.CharField(
+        max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_std"]
+    )
+    network = models.CharField(
+        max_length=20, null=True, blank=True, help_text=HELPER_TEXT["currency_network"]
+    )
     address = models.CharField(
         unique=True, max_length=255, help_text=HELPER_TEXT["address"]
     )
@@ -75,9 +88,9 @@ class Wallet(BaseModel):
     @app_transaction.atomic
     def create_user_wallet(cls, account, user_id, currency_id, status="active"):
         query = {
-            'account': account,
-            'user_id': user_id,
-            'currency_id': currency_id,
+            "account": account,
+            "user_id": user_id,
+            "currency_id": currency_id,
         }
 
         try:
@@ -86,21 +99,19 @@ class Wallet(BaseModel):
         except Wallet.DoesNotExist:
             handler = AddressHandler()
 
-            handler.create_address(
-                currency_id=currency_id, user_id=user_id
-            )
+            handler.create_address(currency_id=currency_id, user_id=user_id)
 
-            query['address'] = handler._address
-            query['label'] = handler._label
-            query['currency_id'] = handler._currency['id']
-            query['currency_name'] = handler._currency['name']
-            query['currency_symbol'] = handler._currency['symbol']
-            query['currency_blockchain'] = handler._currency['blockchain']
-            query['currency_std'] = handler._currency['std']
-            query['network'] = handler._network
-            query['status'] = status
+            query["address"] = handler._address
+            query["label"] = handler._label
+            query["currency_id"] = handler._currency["id"]
+            query["currency_name"] = handler._currency["name"]
+            query["currency_symbol"] = handler._currency["symbol"]
+            query["currency_blockchain"] = handler._currency["blockchain"]
+            query["currency_std"] = handler._currency["std"]
+            query["network"] = handler._network
+            query["status"] = status
 
-            wallet_logo = LOGO_SETTINGS[query['currency_symbol']]
+            wallet_logo = LOGO_SETTINGS[query["currency_symbol"]]
 
             if handler._address and handler._label and handler._currency:
                 wallet = cls.objects.create(**query)
@@ -109,7 +120,7 @@ class Wallet(BaseModel):
                     text=wallet.address, logo_path=wallet_logo
                 )
 
-                wallet_symbol = query['currency_symbol']
+                wallet_symbol = query["currency_symbol"]
 
                 WalletAttribut.objects.create(
                     wallet=wallet,
@@ -181,9 +192,7 @@ class WalletBalance(BaseModel):
         help_text=HELPER_TEXT["wallet_balance_unit"],
     )
     last_updated_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="last updated datetime"
+        null=True, blank=True, help_text="last updated datetime"
     )
 
     def __str__(self):
@@ -197,14 +206,14 @@ class WalletTask(BaseModel):
     wallet = models.ForeignKey(
         Wallet,
         on_delete=models.CASCADE,
-        related_name='wallet_tasks',
-        help_text=HELPER_TEXT['wtt_wallet_id']
+        related_name="wallet_tasks",
+        help_text=HELPER_TEXT["wtt_wallet_id"],
     )
     transaction_code = models.CharField(
         max_length=255,
         null=True,
         blank=True,
-        help_text=HELPER_TEXT['wtt_transaction_code']
+        help_text=HELPER_TEXT["wtt_transaction_code"],
     )
     status = models.CharField(
         max_length=20,
@@ -212,9 +221,9 @@ class WalletTask(BaseModel):
         default="open",
         null=True,
         blank=True,
-        help_text=HELPER_TEXT['wtt_attemp']
+        help_text=HELPER_TEXT["wtt_attemp"],
     )
-    attemp = models.PositiveIntegerField(default=0, help_text=HELPER_TEXT['wtt_status'])
+    attemp = models.PositiveIntegerField(default=0, help_text=HELPER_TEXT["wtt_status"])
 
     def __str__(self):
         return str(self.wallet.address)

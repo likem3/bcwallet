@@ -13,8 +13,8 @@ class LTCHandler(BaseHandler):
     def parsing_balance(self, response):
         try:
             resp_json = response.json()
-            balance_sts = Decimal(resp_json['balance'])
-            return  balance_sts / 100000000
+            balance_sts = Decimal(resp_json["balance"])
+            return balance_sts / 100000000
 
         except Exception as e:
             print(str(e))
@@ -22,12 +22,7 @@ class LTCHandler(BaseHandler):
 
     def get_balance(self, address):
         url = f"{self.url}v2/address/{address}"
-        params = {
-            'page': 1,
-            'pageSize': 1,
-            'details': 'basic',
-            'secondary': 'ltc'
-        }
+        params = {"page": 1, "pageSize": 1, "details": "basic", "secondary": "ltc"}
 
         response = requests.get(url, params=params)
 
@@ -35,14 +30,8 @@ class LTCHandler(BaseHandler):
 
     def get_balance_test(self, address):
         url = f"{self.url_test}v2/address/{address}"
-        params = {
-            'page': 1,
-            'pageSize': 1,
-            'details': 'basic',
-            'secondary': 'ltc'
-        }
+        params = {"page": 1, "pageSize": 1, "details": "basic", "secondary": "ltc"}
 
         response = requests.get(url, params=params)
 
         return self.parsing_balance(response)
-
