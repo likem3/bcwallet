@@ -48,15 +48,19 @@ def get_update_wallet_balance_candidate():
         )
 
         wallets = Wallet.objects.filter(
-            status='active',
+            status="active",
         ).annotate(
-            last_balance_update=Coalesce(Subquery(last_balance_subquery, output_field=DateTimeField()), None),
-            last_task_status=Coalesce(Subquery(last_task_subquery), None)
+            last_balance_update=Coalesce(
+                Subquery(last_balance_subquery, output_field=DateTimeField()), None
+            ),
+            last_task_status=Coalesce(Subquery(last_task_subquery), None),
         )
         wallets = wallets.filter(
-            Q(last_task_status__isnull=True) | Q(last_task_status__in=['cancel', 'fail', 'success']),
-            Q(last_balance_update__lt=threshold_time) | Q(last_balance_update__isnull=True)
-        ).order_by('-created_at')[:30]
+            Q(last_task_status__isnull=True)
+            | Q(last_task_status__in=["cancel", "fail", "success"]),
+            Q(last_balance_update__lt=threshold_time)
+            | Q(last_balance_update__isnull=True),
+        ).order_by("-created_at")[:30]
 
         if not wallets:
             return {"wallet_ids": []}
@@ -66,7 +70,7 @@ def get_update_wallet_balance_candidate():
 
         for wallet in wallets:
             wallet_ids.append(wallet.id)
-            wallet_tasks.append(WalletTask(wallet=wallet, status='open'))
+            wallet_tasks.append(WalletTask(wallet=wallet, status="open"))
 
         wallet_task_in = WalletTask.objects.filter(wallet_id__in=wallet_ids)
         if wallet_task_in:
