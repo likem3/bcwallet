@@ -51,7 +51,11 @@ class CreateAddressHandler(BaseCryptoAPI):
                     generate_deposit_address_rb=generate_deposit_address_rb,
                 )
 
-                if (api_response and api_response.get("data") and api_response["data"].get("item")):
+                if (
+                    api_response
+                    and api_response.get("data")
+                    and api_response["data"].get("item")
+                ):
                     self._address = api_response["data"]["item"]["address"]
                     self._label = api_response["data"]["item"]["label"]
 
@@ -94,7 +98,11 @@ class CreateAddressHandler(BaseCryptoAPI):
             "request_id": time.time(),
         }
 
-        if (api_response and api_response.get("data") and api_response["data"].get("item")):
+        if (
+            api_response
+            and api_response.get("data")
+            and api_response["data"].get("item")
+        ):
             self._address = api_response["data"]["item"]["address"]
             self._label = api_response["data"]["item"]["label"]
 
