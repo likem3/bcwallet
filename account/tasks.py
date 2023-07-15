@@ -3,10 +3,11 @@ from django.utils import timezone
 from datetime import timedelta
 from account.models import Wallet, WalletBalance, WalletTask
 from recharge.models import Transaction
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, DateTimeField, Q
 from apis import Switcher
 from decimal import Decimal
 from django.db import transaction as app_transaction
+from django.db.models.functions import Coalesce
 
 
 @shared_task
@@ -40,12 +41,26 @@ def get_update_wallet_balance_candidate():
             .values("created_at")[:1]
         )
 
-        wallets = (
-            Wallet.objects.exclude(wallet_tasks__status__in=["open", "fail", "success"])
-            .annotate(last_balance_update=Subquery(last_balance_subquery))
-            .filter(last_balance_update__lte=threshold_time)
-            .distinct()
+        last_task_subquery = (
+            WalletTask.objects.filter(wallet_id=OuterRef("id"))
+            .order_by("-created_at")
+            .values("status")[:1]
         )
+
+        wallets = Wallet.objects.filter(
+            status="active",
+        ).annotate(
+            last_balance_update=Coalesce(
+                Subquery(last_balance_subquery, output_field=DateTimeField()), None
+            ),
+            last_task_status=Coalesce(Subquery(last_task_subquery), None),
+        )
+        wallets = wallets.filter(
+            Q(last_task_status__isnull=True)
+            | Q(last_task_status__in=["cancel", "fail", "success"]),
+            Q(last_balance_update__lt=threshold_time)
+            | Q(last_balance_update__isnull=True),
+        ).order_by("-created_at")[:30]
 
         if not wallets:
             return {"wallet_ids": []}
@@ -55,7 +70,7 @@ def get_update_wallet_balance_candidate():
 
         for wallet in wallets:
             wallet_ids.append(wallet.id)
-            wallet_tasks.append(WalletTask(wallet=wallet))
+            wallet_tasks.append(WalletTask(wallet=wallet, status="open"))
 
         wallet_task_in = WalletTask.objects.filter(wallet_id__in=wallet_ids)
         if wallet_task_in:
