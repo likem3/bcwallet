@@ -44,8 +44,8 @@ class TransactionAdmin(BaseAdmin):
         return ""
 
     class Media:
-        css = {"all": ("recharge/css/qrimage.css",)}
-        js = ("recharge/js/qrimage.js",)
+        css = {"all": ("css/qrimage.css",)}
+        js = ("js/qrimage.js",)
 
 
 admin.site.register(Transaction, TransactionAdmin)

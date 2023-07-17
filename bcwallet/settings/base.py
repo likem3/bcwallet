@@ -9,7 +9,8 @@ SECRET_KEY = 'django-insecure-&phq#2wp*$mx152m*=+2j@a5&n)1p@*ik)uo+4wcnd=&42aox5
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['www.test.co']
+ALLOWED_HOSTS = []
+CSRF_TRUSTED_ORIGINS = []
 
 INSTALLED_APPS = [
     'jet.dashboard',
@@ -97,7 +98,10 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'recharge/static/')
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'storages/'
