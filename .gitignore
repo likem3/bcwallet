@@ -180,4 +180,4 @@ setting_*.py
 celerybeat-schedule.*
 
 # static files
-static/
+/static
