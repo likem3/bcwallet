@@ -181,3 +181,6 @@ celerybeat-schedule.*
 
 # static files
 /static
+
+# celery config
+celery.conf
