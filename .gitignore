@@ -182,5 +182,8 @@ celerybeat-schedule.*
 # static files
 /static
 
+# gunicorn config
+gunicorn.conf
+
 # celery config
 celery.conf
