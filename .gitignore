@@ -180,4 +180,10 @@ setting_*.py
 celerybeat-schedule.*
 
 # static files
-static/
+/static
+
+# gunicorn config
+gunicorn.conf
+
+# celery config
+celery.conf
