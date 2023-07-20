@@ -29,7 +29,9 @@ window.addEventListener('load', function () {
             modalImg.src = this.src;
             modalImg.alt = this.alt;
             modalImg.style.width = '100%'
-            addressBill.innerHTML = `<strong>Amount : </strong>${this.dataset.amount}`;
+            if(this.dataset.amount) {
+                addressBill.innerHTML = `<strong>Amount : </strong>${this.dataset.amount}`;
+            }
             addressTxt.innerHTML = `<strong>Address : </strong>${this.dataset.address}`;
             addressCrcy.innerHTML = `<strong>Currency : </strong>${this.alt}`;
         });

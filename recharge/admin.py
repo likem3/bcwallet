@@ -20,6 +20,32 @@ class TransactionAdmin(BaseAdmin):
     ordering = ("-created_at",)
     search_fields = ("user_id", "code", "to_address", "currency_symbol")
 
+    _readonly_fields = [
+        'code',
+        'origin_code',
+        'account',
+        'wallet',
+        'from_address',
+        'to_address',
+        'from_currency',
+        'to_currency',
+        'user_id',
+        'currency_id',
+        'currency_name',
+        'currency_symbol',
+        'currency_blockchain',
+        'currency_std',
+        'amount',
+        'rate',
+        'expired_at',
+        'type',
+        'deleted_at',
+        'deleted_by',
+        'approved_by',
+        'cancelled_by',
+        'created_by',
+    ]
+
     @admin.display(ordering="wallet__attributs__address_qr", description="QR")
     def get_qr(self, obj):
         addrs = obj.wallet.address
