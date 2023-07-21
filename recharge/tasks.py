@@ -1,6 +1,7 @@
-from recharge.models import Transaction
-from account.models import Wallet, WalletTask
 from celery import shared_task
+
+from account.models import Wallet, WalletTask
+from recharge.models import Transaction
 
 
 @shared_task

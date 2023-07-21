@@ -1,6 +1,8 @@
-from django.conf import settings as app_settings
-import requests
 from decimal import Decimal
+
+import requests
+from django.conf import settings as app_settings
+
 from apis.handlers import BaseHandler
 
 

@@ -1,6 +1,7 @@
-from utils.admins import BaseAdmin, admin
-from account.models import Account, Wallet, WalletAttribut, WalletBalance, WalletTask
 from django.utils.safestring import mark_safe
+
+from account.models import Account, Wallet, WalletAttribut, WalletBalance, WalletTask
+from utils.admins import BaseAdmin, admin
 
 
 class AccountAdmin(BaseAdmin):
@@ -99,7 +100,7 @@ class WalletAttributAdmin(BaseAdmin):
             """
             return mark_safe(html_image.strip())
         return ""
-    
+
     @admin.display(ordering="logo", description="Logo")
     def get_logo(self, obj):
         logo = obj.logo

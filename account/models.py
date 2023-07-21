@@ -1,14 +1,15 @@
 from django.db import models
-from utils.models import BaseModel
+from django.db import transaction as app_transaction
+
 from apis.addrbank.address import Address as AddressHandler
-from utils.handlers import generate_qrcode_with_logo
 from bcwallet.settings import (
+    HELPER_TEXT,
     LOGO_SETTINGS,
     STATUS_CHOICES_MODEL,
-    HELPER_TEXT,
     WALLET_TASK_STATUS,
 )
-from django.db import transaction as app_transaction
+from utils.handlers import generate_qrcode_with_logo
+from utils.models import BaseModel
 
 
 class Account(BaseModel):
@@ -36,6 +37,7 @@ class Account(BaseModel):
 
     class Meta:
         db_table = "account_accounts"
+        ordering = ["-created_at"]
 
 
 class Wallet(BaseModel):
@@ -83,6 +85,7 @@ class Wallet(BaseModel):
 
     class Meta:
         db_table = "account_wallets"
+        ordering = ["-created_at"]
 
     @classmethod
     @app_transaction.atomic
@@ -160,6 +163,7 @@ class WalletAttribut(BaseModel):
 
     class Meta:
         db_table = "account_wallet_attributs"
+        ordering = ["-created_at"]
 
 
 class WalletBalance(BaseModel):
@@ -200,6 +204,7 @@ class WalletBalance(BaseModel):
 
     class Meta:
         db_table = "account_wallet_balance"
+        ordering = ["-created_at"]
 
 
 class WalletTask(BaseModel):
@@ -230,6 +235,7 @@ class WalletTask(BaseModel):
 
     class Meta:
         db_table = "account_wallet_tasks"
+        ordering = ["-created_at"]
 
     @classmethod
     def create_task(cls, wallet, transaction_code):

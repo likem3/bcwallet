@@ -1,7 +1,8 @@
 from drf_yasg import openapi
+from rest_framework import status
+
 from account.serializers import WalletSerializer
 from bcwallet.settings import HELPER_TEXT
-from rest_framework import status
 
 create_wallet_schema = {
     "request_body": openapi.Schema(

@@ -1,7 +1,8 @@
+from cryptoapis import ApiClient, ApiException, Configuration
+from cryptoapis.api import informative_api
+
 from apis.cryptoapi import BaseCryptoAPI
 from bcwallet.settings import CRYPTOAPI_MASTER_WALLET
-from cryptoapis import ApiClient, Configuration, ApiException
-from cryptoapis.api import informative_api
 
 
 class ListAddressesHandler(BaseCryptoAPI):
