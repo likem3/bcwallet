@@ -1,15 +1,13 @@
-from recharge.serializers import (
-    DepositTransactionSerializer,
-    CurrencySerializer,
-)
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics, filters, status
-from rest_framework.views import APIView
-from recharge.models import Transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from utils.paginations import SizePagePagination
-from apis.addrbank.currency import Currency
+from rest_framework import filters, generics, status
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from apis.addrbank.currency import Currency
+from recharge.models import Transaction
+from recharge.serializers import CurrencySerializer, DepositTransactionSerializer
+from utils.paginations import SizePagePagination
 
 
 class CreateDepositTransactionView(generics.ListCreateAPIView):

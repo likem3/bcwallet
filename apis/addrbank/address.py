@@ -1,5 +1,6 @@
-from apis.addrbank import BaseAddrBank
 import requests
+
+from apis.addrbank import BaseAddrBank
 
 
 class Address(BaseAddrBank):

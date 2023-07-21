@@ -1,16 +1,18 @@
-import qrcode
 import base64
 import os
-from io import BytesIO
 import time
+from decimal import Decimal
+from io import BytesIO
+
+import qrcode
 from PIL import Image
+
 from bcwallet.settings import (
     BASE_DIR,
+    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
     BLOCKCHAIN_NETWORK_MAP,
     ENVIRONMENT_SETTING,
-    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
 )
-from decimal import Decimal
 
 
 def handle_blockchain_network(blockchain):

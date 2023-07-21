@@ -1,6 +1,4 @@
-from apis.cryptoapi import BaseCryptoAPI
-from bcwallet.settings import CRYPTOAPI_MASTER_WALLET
-from cryptoapis import ApiClient, Configuration, ApiException
+from cryptoapis import ApiClient, ApiException, Configuration
 from cryptoapis.api import generating_api
 from cryptoapis.model.generate_deposit_address_rb import GenerateDepositAddressRB
 from cryptoapis.model.generate_deposit_address_rb_data import (
@@ -9,6 +7,9 @@ from cryptoapis.model.generate_deposit_address_rb_data import (
 from cryptoapis.model.generate_deposit_address_rb_data_item import (
     GenerateDepositAddressRBDataItem,
 )
+
+from apis.cryptoapi import BaseCryptoAPI
+from bcwallet.settings import CRYPTOAPI_MASTER_WALLET
 
 
 class CreateAddressHandler(BaseCryptoAPI):
@@ -70,9 +71,9 @@ class CreateAddressHandler(BaseCryptoAPI):
                 }
 
     def create_fake_adress(self, blockchain, network, label):
-        import time
         import random
         import string
+        import time
 
         def generate_fake_wallet_address():
             alphabet = string.ascii_lowercase + string.digits

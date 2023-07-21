@@ -1,7 +1,9 @@
-from account.models import Account, Wallet, WalletAttribut, WalletBalance
-from rest_framework import serializers
 import uuid
+
+from rest_framework import serializers
 from rest_framework.exceptions import ParseError
+
+from account.models import Account, Wallet, WalletAttribut, WalletBalance
 
 
 class AccountSerializer(serializers.ModelSerializer):

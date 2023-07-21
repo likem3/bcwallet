@@ -1,6 +1,7 @@
+import requests
 from django.conf import settings as app_settings
 from jsonrpcclient import request
-import requests
+
 from apis.handlers import BaseHandler
 
 
