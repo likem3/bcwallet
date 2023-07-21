@@ -103,8 +103,8 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'recharge/static/')
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'storages/'
+MEDIA_URL = 'storages/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'storages')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
