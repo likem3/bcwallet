@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ParseError
 
 from account.models import Account, Wallet, WalletAttribut, WalletBalance
+from apis.addrbank.currency import Currency
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -82,9 +83,13 @@ class WalletSerializer(serializers.ModelSerializer):
         if not Account.objects.filter(
             user_id=data["user_id"], status="active"
         ).exists():
-            raise serializers.ValidationError("invalid user id")
+            raise serializers.ValidationError({"user_id":"invalid user id"})
 
-        # TODO add validation for currency_id inputed
+        handdler = Currency()
+        currenccy = handdler.get_currency_detail(data['currency_id'])
+
+        if not currenccy:
+            raise serializers.ValidationError({"currency_id": "Invalid currency_id"})
 
         return data
 
