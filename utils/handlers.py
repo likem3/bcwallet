@@ -53,7 +53,7 @@ def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):
     # Resize the logo to 20% of the QR code size
     qr_size = qr_image.size
     logo_size = (qr_size[0] // 5, qr_size[1] // 5)
-    logo_image = logo_image.resize(logo_size, Image.ANTIALIAS)
+    logo_image = logo_image.resize(logo_size, Image.Resampling.LANCZOS)
 
     # Calculate the position to overlay the logo
     logo_position = ((qr_size[0] - logo_size[0]) // 2, (qr_size[1] - logo_size[1]) // 2)
