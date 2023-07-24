@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
     'account',
     'recharge',
+    'merchant',
 ]
 
 MIDDLEWARE = [

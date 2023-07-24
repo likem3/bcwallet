@@ -5,21 +5,49 @@ from rest_framework.exceptions import ParseError
 
 from account.models import Account, Wallet, WalletAttribut, WalletBalance
 from apis.addrbank.currency import Currency
+from merchant.serializers import MerchantSerializer
+from merchant.models import Merchant
+
+from django.conf import settings as app_settings
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class CreateAccountSerializer(serializers.ModelSerializer):
+    merchant_code = serializers.IntegerField(
+        min_value=1000,
+        write_only=True,
+        help_text=app_settings.HELPER_TEXT["merchant_code"]
+    )
+
     class Meta:
         model = Account
-        fields = Account.get_fields(excludes=["wallets", "account_transactions"])
-        read_only_fields = Account.get_fields(excludes=["user_id", "email", "username"])
+        fields = Account.get_fields(excludes=["wallets", "account_transactions"], extras=["merchant_code"])
+        read_only_fields = Account.get_fields(excludes=["user_id", "email", "username", "merchant_code"])
+
+    def validate(self, attrs):
+        super().validate(attrs)
+        merchant_code = attrs["merchant_code"]
+        if not Merchant.objects.filter(status='active', code=merchant_code).exists():
+            raise serializers.ValidationError({"merchant_code": "Invalid merchant code"})
+
+        return attrs
 
     def create(self, validated_data):
-        try:
-            return Account.objects.create(
-                uuid=uuid.uuid4(), status="active", **validated_data
-            )
-        except Exception as e:
-            raise serializers.ValidationError(f"Unable to create account, {str(e)}")
+        account = Account.get_or_create(
+            **validated_data
+        )
+
+        if not account:
+            raise serializers.ValidationError("Unable to create account")
+
+        return account
+
+class AccountSerializer(serializers.ModelSerializer):
+    merchant_code = serializers.IntegerField(source="merchant.code", allow_null=True)
+
+    class Meta:
+        model = Account
+        fields = Account.get_fields(excludes=["wallets", "account_transactions", "merchant"], extras=["merchant_code"])
+        read_only_fields = Account.get_fields(excludes=["user_id", "email", "username"])
 
     def update(self, instance, validated_data):
         # Disable updating the user_id field

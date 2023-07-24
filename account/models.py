@@ -8,28 +8,36 @@ from bcwallet.settings import (
     STATUS_CHOICES_MODEL,
     WALLET_TASK_STATUS,
 )
+from merchant.models import Merchant
 from utils.handlers import generate_qrcode_with_logo
 from utils.models import BaseModel
-
+import uuid
 
 class Account(BaseModel):
     uuid = models.UUIDField(
         unique=True, editable=False, help_text=HELPER_TEXT["account_uuid"]
     )
     user_id = models.PositiveIntegerField(
-        unique=True, help_text=HELPER_TEXT["account_user_id"]
+        unique=False, help_text=HELPER_TEXT["account_user_id"]
     )
     email = models.EmailField(
-        unique=True, max_length=100, help_text=HELPER_TEXT["account_email"]
+        unique=False, max_length=100, blank=True, null=True, help_text=HELPER_TEXT["account_email"]
     )
     username = models.CharField(
-        max_length=255, unique=True, help_text=HELPER_TEXT["account_username"]
+        max_length=255, unique=False, blank=True, null=True, help_text=HELPER_TEXT["account_username"]
     )
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES_MODEL,
         default="nonactive",
         help_text="status of the account",
+    )
+    merchant = models.ForeignKey(
+        Merchant,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["merchant"],
     )
 
     def __str__(self):
@@ -38,6 +46,40 @@ class Account(BaseModel):
     class Meta:
         db_table = "account_accounts"
         ordering = ["-created_at"]
+
+    @classmethod
+    def client_merchant(self):
+        try:
+            return self.merchants_set.latest('created_at')
+        except:
+            return None
+
+    @classmethod
+    def get_or_create(cls, merchant_code, user_id, **kwargs):
+        merchant = Merchant.objects.get(code=merchant_code)
+        user_id = user_id
+        data = {
+            'email': kwargs.pop('email'),
+            'username': kwargs.pop('username')
+        }
+        try:
+            account =  cls.objects.get(
+                merchant=merchant,
+                user_id=user_id
+            )
+
+            return account
+
+        except cls.DoesNotExist:
+            account = cls.objects.create(
+                uuid=uuid.uuid4(),
+                merchant=merchant,
+                user_id=user_id,
+                status="active",
+                **data
+            )
+            return account
+
 
 
 class Wallet(BaseModel):

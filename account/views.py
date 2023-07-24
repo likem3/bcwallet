@@ -6,18 +6,22 @@ from rest_framework.response import Response
 
 from account.models import Account, Wallet
 from account.schemas import create_wallet_schema, get_account_list_schema
-from account.serializers import AccountSerializer, WalletSerializer
+from account.serializers import AccountSerializer, CreateAccountSerializer, WalletSerializer
 from utils.paginations import SizePagePagination
 
 
 class UserListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
-    serializer_class = AccountSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["user_id", "email", "username"]
     ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id"]
     pagination_class = SizePagePagination
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return CreateAccountSerializer
+        return AccountSerializer
 
     @swagger_auto_schema(**get_account_list_schema)
     def get(self, request, *args, **kwargs):

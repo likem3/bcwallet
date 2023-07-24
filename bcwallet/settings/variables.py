@@ -200,4 +200,8 @@ HELPER_TEXT = {
     "wtt_wallet_id": "Wallet id related",
     "wtt_attemp": "Number of attemp running task",
     "wtt_status": "Status task",
+    "merchant": "merchant of the system",
+    "merchant_code": "Merchant code identifier",
+    "merchant_name": "Merchant name",
+    "merchant_status": "Merchant status",
 }
