@@ -1,8 +1,9 @@
 from django.urls import path
+
 from recharge.views import (
     CreateDepositTransactionView,
-    TransactionListByUserIDView,
     CurrencyListClass,
+    TransactionListByUserIDView,
 )
 
 urlpatterns = [

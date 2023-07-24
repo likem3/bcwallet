@@ -1,10 +1,12 @@
-from django.db import models
-from utils.models import ExtraBaseModel
-from account.models import Account, Wallet
-from utils.handlers import handle_transaction_code
-from django.utils import timezone
 from datetime import timedelta
-from bcwallet.settings import TRANSACTION_STATUS, HELPER_TEXT, TRANSACTION_TYPE_OPTION
+
+from django.db import models
+from django.utils import timezone
+
+from account.models import Account, Wallet
+from bcwallet.settings import HELPER_TEXT, TRANSACTION_STATUS, TRANSACTION_TYPE_OPTION
+from utils.handlers import handle_transaction_code
+from utils.models import ExtraBaseModel
 
 
 class Transaction(ExtraBaseModel):

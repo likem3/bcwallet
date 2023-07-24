@@ -1,13 +1,13 @@
-from rest_framework import generics
-from account.serializers import AccountSerializer, WalletSerializer
-from account.models import Account, Wallet
-from rest_framework.response import Response
-from rest_framework import status, filters
-from rest_framework.permissions import IsAuthenticated
-from drf_yasg.utils import swagger_auto_schema
-from account.schemas import create_wallet_schema, get_account_list_schema
-from utils.paginations import SizePagePagination
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import filters, generics, status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from account.models import Account, Wallet
+from account.schemas import create_wallet_schema, get_account_list_schema
+from account.serializers import AccountSerializer, WalletSerializer
+from utils.paginations import SizePagePagination
 
 
 class UserListCreateView(generics.ListCreateAPIView):

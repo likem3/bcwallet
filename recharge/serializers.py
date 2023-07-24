@@ -1,15 +1,18 @@
-from rest_framework import serializers
-from account.models import Account, Wallet as AccountWallet
-from account.serializers import WalletAttributSerializer
-from recharge.models import Transaction
-from bcwallet.settings import HELPER_TEXT
-from utils.handlers import handle_minimum_deposit_amount
+from datetime import timedelta
 from decimal import Decimal
-from apis.addrbank.currency import Currency
-from account.tasks import create_wallet_task
+
 from django.db import transaction as model_transaction
 from django.utils import timezone
-from datetime import timedelta
+from rest_framework import serializers
+
+from account.models import Account
+from account.models import Wallet as AccountWallet
+from account.serializers import WalletAttributSerializer
+from account.tasks import create_wallet_task
+from apis.addrbank.currency import Currency
+from bcwallet.settings import HELPER_TEXT
+from recharge.models import Transaction
+from utils.handlers import handle_minimum_deposit_amount
 
 
 class DepositTransactionSerializer(serializers.ModelSerializer):

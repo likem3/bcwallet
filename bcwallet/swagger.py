@@ -1,12 +1,14 @@
+from drf_yasg import generators, openapi
 from drf_yasg.views import get_schema_view
-from drf_yasg import openapi, generators
+
 
 class BothHttpAndHttpsSchemaGenerator(generators.OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
         schema.schemes = ["http", "https"]
         return schema
-    
+
+
 schema_view = get_schema_view(
     openapi.Info(
         title="bcwallet API",
