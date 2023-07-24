@@ -1,15 +1,14 @@
+from unittest.mock import patch
+
 from django.urls import reverse
-from django.conf import settings as app_settings
 from faker import Faker
 from model_bakery import baker
 from rest_framework import status
+
+from account.models import Account, Wallet
 from account.tests.response_mock import Currency
-from unittest.mock import patch
 from apis.addrbank.address import Address as AddressHandler
 from apis.addrbank.currency import Currency as CurrencyHandler
-
-from account.models import Account, Wallet, WalletAttribut, WalletBalance
-from utils.handlers import generate_qrcode_with_logo
 from utils.tests import TestSetup
 
 
@@ -17,44 +16,42 @@ class WalletTestCase(TestSetup):
     def setUp(self):
         super().setUp()
         self.autheticate()
-        self.account = baker.make(
-            Account,
-            user_id=111,
-            status='active'
-        )
+        self.account = baker.make(Account, user_id=111, status="active")
         self.faker = Faker()
         self.currency = Currency()
 
-    @patch.object(CurrencyHandler, 'get_currency_detail')
-    @patch.object(AddressHandler, 'get_assign_address')
-    def wallet_create_address_success(self, symbol, mock_create_address, mock_currency_details):
-        url = reverse('wallets-list-create')
+    @patch.object(CurrencyHandler, "get_currency_detail")
+    @patch.object(AddressHandler, "get_assign_address")
+    def wallet_create_address_success(
+        self, symbol, mock_create_address, mock_currency_details
+    ):
+        url = reverse("wallets-list-create")
         btc_currency = self.currency.get_currency(symbol)
-        data = {
-            'user_id': self.account.user_id,
-            'currency_id': btc_currency['id']
-        }
+        data = {"user_id": self.account.user_id, "currency_id": btc_currency["id"]}
 
         mock_currency_details.return_value = btc_currency
-        mock_create_address.return_value = self.currency.get_address(symbol, self.account.user_id)
+        mock_create_address.return_value = self.currency.get_address(
+            symbol, self.account.user_id
+        )
 
         response = self.client.post(url, data=data)
         response_json = response.json()
-        response_data = response_json['data']
+        response_data = response_json["data"]
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(f"{btc_currency['symbol']} - {data['user_id']}", response_data['label'])
-        self.assertEqual(btc_currency['symbol'], response_data['currency_symbol'])
+        self.assertEqual(
+            f"{btc_currency['symbol']} - {data['user_id']}", response_data["label"]
+        )
+        self.assertEqual(btc_currency["symbol"], response_data["currency_symbol"])
 
-    @patch.object(CurrencyHandler, 'get_currency_detail')
-    @patch.object(AddressHandler, 'get_assign_address')
-    def wallet_create_address_fail_assign_address(self, symbol, mock_create_address, mock_currency_details):
-        url = reverse('wallets-list-create')
+    @patch.object(CurrencyHandler, "get_currency_detail")
+    @patch.object(AddressHandler, "get_assign_address")
+    def wallet_create_address_fail_assign_address(
+        self, symbol, mock_create_address, mock_currency_details
+    ):
+        url = reverse("wallets-list-create")
         btc_currency = self.currency.get_currency(symbol)
-        data = {
-            'user_id': self.account.user_id,
-            'currency_id': btc_currency['id']
-        }
+        data = {"user_id": self.account.user_id, "currency_id": btc_currency["id"]}
 
         mock_currency_details.return_value = btc_currency
         mock_create_address.return_value = None
@@ -64,174 +61,159 @@ class WalletTestCase(TestSetup):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_wallet_create_btc_address_success(self):
-        self.wallet_create_address_success('BTC')
+        self.wallet_create_address_success("BTC")
 
     def test_wallet_create_doge_address_success(self):
-        self.wallet_create_address_success('DOGE')
+        self.wallet_create_address_success("DOGE")
 
     def test_wallet_create_ltc_address_success(self):
-        self.wallet_create_address_success('LTC')
+        self.wallet_create_address_success("LTC")
 
     def test_wallet_create_eth_address_success(self):
-        self.wallet_create_address_success('ETH')
+        self.wallet_create_address_success("ETH")
 
     def test_wallet_create_trx_address_success(self):
-        self.wallet_create_address_success('TRX')
+        self.wallet_create_address_success("TRX")
 
     def test_wallet_create_usdt_address_success(self):
-        self.wallet_create_address_success('USDTTRC20')
+        self.wallet_create_address_success("USDTTRC20")
 
     def test_wallet_create_btc_address_fail_assign_addreess(self):
-        self.wallet_create_address_fail_assign_address('BTC')
+        self.wallet_create_address_fail_assign_address("BTC")
 
     def test_wallet_create_doge_address_fail_assign_addreess(self):
-        self.wallet_create_address_fail_assign_address('DOGE')
+        self.wallet_create_address_fail_assign_address("DOGE")
 
     def test_wallet_create_ltc_address_fail_assign_addreess(self):
-        self.wallet_create_address_fail_assign_address('LTC')
+        self.wallet_create_address_fail_assign_address("LTC")
 
     def test_wallet_create_eth_address_fail_assign_addreess(self):
-        self.wallet_create_address_fail_assign_address('ETH')
+        self.wallet_create_address_fail_assign_address("ETH")
 
     def test_wallet_create_trx_address_fail_assign_addreess(self):
-        self.wallet_create_address_fail_assign_address('TRX')
+        self.wallet_create_address_fail_assign_address("TRX")
 
     def test_wallet_create_usdt_address_fail_assign_addreess(self):
-        self.wallet_create_address_fail_assign_address('USDTTRC20')
+        self.wallet_create_address_fail_assign_address("USDTTRC20")
 
     def test_create_wallet_fail_invalid_user_id(self):
-        url = reverse('wallets-list-create')
-        btc_currency = self.currency.get_currency('BTC')
-        data = {
-            'user_id': 30000,
-            'currency_id': btc_currency['id']
-        }
+        url = reverse("wallets-list-create")
+        btc_currency = self.currency.get_currency("BTC")
+        data = {"user_id": 30000, "currency_id": btc_currency["id"]}
 
         response = self.client.post(url, data=data)
         response_json = response.json()
-        error_message = response_json['error']
+        error_message = response_json["error"]
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('user_id', error_message)
+        self.assertIn("user_id", error_message)
 
-    @patch.object(CurrencyHandler, 'get_currency_detail')
+    @patch.object(CurrencyHandler, "get_currency_detail")
     def test_create_wallet_fail_invalid_currency_id(self, get_currency_detail):
-        url = reverse('wallets-list-create')
+        url = reverse("wallets-list-create")
         # btc_currency = self.currency.get_currency('BTC')
-        data = {
-            'user_id': self.account.user_id,
-            'currency_id': 30000
-        }
+        data = {"user_id": self.account.user_id, "currency_id": 30000}
 
         get_currency_detail.return_value = None
 
         response = self.client.post(url, data=data)
         response_json = response.json()
-        error_message = response_json['error']
+        error_message = response_json["error"]
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('currency_id', error_message)
+        self.assertIn("currency_id", error_message)
 
     def test_get_wallet_list_success(self):
         currencies = self.currency.get_currencies()
 
-        url = reverse('wallets-list-create')
+        url = reverse("wallets-list-create")
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.json()['data']['results'] == [])
+        self.assertTrue(response.json()["data"]["results"] == [])
 
         for key in currencies.keys():
-            address_resp = self.currency.get_address(
-                key,
-                self.account.user_id
-            )
+            address_resp = self.currency.get_address(key, self.account.user_id)
             baker.make(
                 Wallet,
                 account=self.account,
                 user_id=self.account.user_id,
-                currency_id=address_resp['currency_id'],
-                currency_name=address_resp['currency']['name'],
-                currency_symbol=address_resp['currency']['symbol'],
-                currency_blockchain=address_resp['currency']['blockchain'],
-                currency_std=address_resp['currency']['std'],
-                network=address_resp['currency']['network']['type'],
-                address=address_resp['address'],
-                label=address_resp['label'],
-                status='active',
+                currency_id=address_resp["currency_id"],
+                currency_name=address_resp["currency"]["name"],
+                currency_symbol=address_resp["currency"]["symbol"],
+                currency_blockchain=address_resp["currency"]["blockchain"],
+                currency_std=address_resp["currency"]["std"],
+                network=address_resp["currency"]["network"]["type"],
+                address=address_resp["address"],
+                label=address_resp["label"],
+                status="active",
             )
 
-        url = reverse('wallets-list-create')
+        url = reverse("wallets-list-create")
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(len(response.json()['data']['results']) > 0)
+        self.assertTrue(len(response.json()["data"]["results"]) > 0)
 
     def test_get_wallet_list_by_user_success(self):
         currencies = self.currency.get_currencies()
 
-        url = reverse('wallets-user-list', args=(self.account.user_id,))
+        url = reverse("wallets-user-list", args=(self.account.user_id,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.json()['data']['results'] == [])
+        self.assertTrue(response.json()["data"]["results"] == [])
 
         for key in currencies.keys():
-            address_resp = self.currency.get_address(
-                key,
-                self.account.user_id
-            )
+            address_resp = self.currency.get_address(key, self.account.user_id)
             baker.make(
                 Wallet,
                 account=self.account,
                 user_id=self.account.user_id,
-                currency_id=address_resp['currency_id'],
-                currency_name=address_resp['currency']['name'],
-                currency_symbol=address_resp['currency']['symbol'],
-                currency_blockchain=address_resp['currency']['blockchain'],
-                currency_std=address_resp['currency']['std'],
-                network=address_resp['currency']['network']['type'],
-                address=address_resp['address'],
-                label=address_resp['label'],
-                status='active',
+                currency_id=address_resp["currency_id"],
+                currency_name=address_resp["currency"]["name"],
+                currency_symbol=address_resp["currency"]["symbol"],
+                currency_blockchain=address_resp["currency"]["blockchain"],
+                currency_std=address_resp["currency"]["std"],
+                network=address_resp["currency"]["network"]["type"],
+                address=address_resp["address"],
+                label=address_resp["label"],
+                status="active",
             )
 
-        url = reverse('wallets-user-list', args=(self.account.user_id,))
+        url = reverse("wallets-user-list", args=(self.account.user_id,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(len(response.json()['data']['results']) > 0)
+        self.assertTrue(len(response.json()["data"]["results"]) > 0)
 
     def test_get_wallet_detail_by_id_success(self):
         currencies = self.currency.get_currencies()
 
         for key in currencies.keys():
-            address_resp = self.currency.get_address(
-                key,
-                self.account.user_id
-            )
+            address_resp = self.currency.get_address(key, self.account.user_id)
             wallet = baker.make(
                 Wallet,
                 account=self.account,
                 user_id=self.account.user_id,
-                currency_id=address_resp['currency_id'],
-                currency_name=address_resp['currency']['name'],
-                currency_symbol=address_resp['currency']['symbol'],
-                currency_blockchain=address_resp['currency']['blockchain'],
-                currency_std=address_resp['currency']['std'],
-                network=address_resp['currency']['network']['type'],
-                address=address_resp['address'],
-                label=address_resp['label'],
-                status='active',
+                currency_id=address_resp["currency_id"],
+                currency_name=address_resp["currency"]["name"],
+                currency_symbol=address_resp["currency"]["symbol"],
+                currency_blockchain=address_resp["currency"]["blockchain"],
+                currency_std=address_resp["currency"]["std"],
+                network=address_resp["currency"]["network"]["type"],
+                address=address_resp["address"],
+                label=address_resp["label"],
+                status="active",
             )
 
-            url = reverse('wallets-detail', args=(wallet.id,))
+            url = reverse("wallets-detail", args=(wallet.id,))
             response = self.client.get(url)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertTrue(response.json()['data'] != {})
+            self.assertTrue(response.json()["data"] != {})
 
     def test_get_wallet_detail_by_id_fail(self):
-        url = reverse('wallets-detail', args=(1,))
+        url = reverse("wallets-detail", args=(1,))
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

@@ -2,7 +2,6 @@ import json
 import time
 
 from django.conf import settings
-import hashlib
 from faker import Faker
 
 
@@ -26,78 +25,70 @@ class Currency:
             "name": "Litecoin",
             "symbol": "LTC",
             "blockchain": "litecoin",
-            "std": None
+            "std": None,
         },
         "ETH": {
             "id": 4,
             "name": "Ethereum",
             "symbol": "ETH",
             "blockchain": "ethereum",
-            "std": None
+            "std": None,
         },
         "TRX": {
             "id": 5,
             "name": "Tron",
             "symbol": "TRX",
             "blockchain": "tron",
-            "std": None
+            "std": None,
         },
         "USDTTRC20": {
             "id": 6,
             "name": "Tether USD",
             "symbol": "USDT",
             "blockchain": "tron",
-            "std": "TRC20"
+            "std": "TRC20",
         },
     }
     newtworks = {
-        'mainnet': {
-            'name': 'Mainnet',
-            'description': 'Mainnet network',
-            'type': 'mainnet'
+        "mainnet": {
+            "name": "Mainnet",
+            "description": "Mainnet network",
+            "type": "mainnet",
         },
-        'goerli': {
-            'name': 'Goerli',
-            'description': 'Goerli network',
-            'type': 'goerli'
+        "goerli": {"name": "Goerli", "description": "Goerli network", "type": "goerli"},
+        "nile": {"name": "Nile", "description": "Nile network", "type": "nile"},
+        "testnet": {
+            "name": "Testnet",
+            "description": "Testnet Network",
+            "type": "testnet",
         },
-        'nile': {
-            'name': 'Nile',
-            'description': 'Nile network',
-            'type': 'nile'
-        },
-        'testnet': {
-            'name': 'Testnet',
-            'description': 'Testnet Network',
-            'type': 'testnet'
-        }
     }
     currencies_response = {}
 
     def __init__(self):
         self.faker = Faker()
         for idx, key in enumerate(self.currencies):
-            if settings.ENVIRONMENT_SETTING == 'production':
+            if settings.ENVIRONMENT_SETTING == "production":
                 currency = self.currencies[key]
-                currency['id'] = idx + 1
-                currency['network'] = self.newtworks['mainnet']
+                currency["id"] = idx + 1
+                currency["network"] = self.newtworks["mainnet"]
 
-                self.currencies_response[key]= currency
+                self.currencies_response[key] = currency
 
             else:
                 currency = self.currencies[key]
-                currency['id'] = idx + 1
+                currency["id"] = idx + 1
 
-                if key == 'ETH':
-                    currency['network'] = self.newtworks['goerli']
+                if key == "ETH":
+                    currency["network"] = self.newtworks["goerli"]
 
-                elif key in ['TRX', 'USDTTRC20']:
-                    currency['network'] = self.newtworks['nile']
+                elif key in ["TRX", "USDTTRC20"]:
+                    currency["network"] = self.newtworks["nile"]
 
                 else:
-                    currency['network'] = self.newtworks['testnet']
+                    currency["network"] = self.newtworks["testnet"]
 
-                self.currencies_response[key]= currency
+                self.currencies_response[key] = currency
 
     def get_currency(self, symbol):
         return self.currencies_response.get(symbol, {})
@@ -106,11 +97,11 @@ class Currency:
         currency = self.currencies_response.get(symbol, {})
         if currency:
             address = {
-                'currency_id': currency['id'],
-                'user_id': user_id,
-                'address': self.faker.sha256(),
-                'label': f"{currency['symbol']} - {user_id}",
-                'currency': self.currencies_response[symbol],
+                "currency_id": currency["id"],
+                "user_id": user_id,
+                "address": self.faker.sha256(),
+                "label": f"{currency['symbol']} - {user_id}",
+                "currency": self.currencies_response[symbol],
             }
             return address
         return {}
@@ -121,7 +112,10 @@ class Currency:
     def generate_json_response(self):
         return json.dumps(
             {
-                'success': True,
-                'data': [self.currencies_response[key] for key in self.currencies_response.keys()]
+                "success": True,
+                "data": [
+                    self.currencies_response[key]
+                    for key in self.currencies_response.keys()
+                ],
             }
         )
