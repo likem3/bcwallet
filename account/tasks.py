@@ -11,6 +11,8 @@ from account.models import Wallet, WalletBalance, WalletTask
 from apis import Switcher
 from recharge.models import Transaction
 
+from recharge.tasks import update_transactions_status_success
+
 
 @shared_task
 def create_wallet_task(transaction_code):
@@ -203,36 +205,3 @@ def update_wallet_balance():
     except Exception as e:
         print(str(e))
         return {"status": "task_failed"}
-
-
-@shared_task
-def update_transactions_status_success(transactions_data={}):
-    transactions = Transaction.objects.filter(
-        code__in=transactions_data.keys(), status="pending"
-    )
-    trx_update_data = []
-    trx_ids_updated = []
-    if transactions:
-        for trx in transactions:
-            balance_in = transactions_data.get(trx.code, 0)
-            if balance_in and Decimal(balance_in) >= Decimal(trx.amount):
-                trx.status = "completed"
-                trx_update_data.append(trx)
-                trx_ids_updated.append({trx.code: balance_in})
-
-    if trx_update_data:
-        Transaction.objects.bulk_update(trx_update_data, ["status"])
-
-    return trx_ids_updated
-
-
-@shared_task
-def update_transaction_status_failed():
-    # Calculate the time threshold (30 minutes ago)
-    threshold = timezone.now() - timedelta(minutes=30)
-
-    num_affected = Transaction.objects.filter(
-        expired_at__lt=threshold, status="pending"
-    ).update(status="failed")
-
-    return {"total_trx_updated_to_fail": num_affected}

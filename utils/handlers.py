@@ -15,6 +15,8 @@ from bcwallet.settings import (
     ENVIRONMENT_SETTING,
 )
 
+from urllib.parse import urlencode, urlparse, parse_qs, urlunparse
+
 
 def handle_blockchain_network(blockchain):
     if ENVIRONMENT_SETTING == "production":
@@ -75,3 +77,21 @@ def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):
     # Encode the image data as base64
     base64_image = base64.b64encode(image_buffer.read()).decode("utf-8")
     return f"data:image/png;base64,{base64_image}"
+
+
+def handle_url_parameter(url, new_parems={}):
+    # Parse the existing URL to get its components
+    parsed_url = urlparse(url)
+
+    # Get the current parameters from the URL
+    current_params = parse_qs(parsed_url.query)
+
+    # Update the current parameters with the new parameters
+    current_params.update(new_parems)
+
+    # Convert the updated parameters back to URL-encoded string
+    updated_query_string = urlencode(current_params, doseq=True)
+    
+    updated_url = urlunparse((parsed_url.scheme, parsed_url.netloc, parsed_url.path, parsed_url.params, updated_query_string, parsed_url.fragment))
+
+    return updated_url
