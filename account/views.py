@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from account.models import Account, Wallet
-from account.schemas import create_wallet_schema, get_account_list_schema
-from account.serializers import AccountSerializer, CreateAccountSerializer, WalletSerializer
+from account.schemas import create_account_schema, create_wallet_schema, get_account_list_schema
+from account.serializers import AccountSerializer, WalletSerializer
 from utils.paginations import SizePagePagination
 from utils.mixins import DetailMultipleFieldLookupMixin
 
@@ -18,15 +18,15 @@ class UserListCreateView(generics.ListCreateAPIView):
     search_fields = ["merchant__code", "user_id", "email", "username"]
     ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id"]
     pagination_class = SizePagePagination
-
-    def get_serializer_class(self):
-        if self.request.method == "POST":
-            return CreateAccountSerializer
-        return AccountSerializer
+    serializer_class =AccountSerializer
 
     @swagger_auto_schema(**get_account_list_schema)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
+    
+    @swagger_auto_schema(**create_account_schema)
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 class UserDetailSuspendView(generics.RetrieveDestroyAPIView):
@@ -78,7 +78,7 @@ class UserDetailSuspendUserView(generics.RetrieveAPIView):
 
 class WalletListCreateView(generics.ListCreateAPIView):
     # permission_classes = [IsAuthenticated]
-    queryset = Wallet.objects.filter(status="active", account__status="active").prefetch_related("merchant")
+    queryset = Wallet.objects.filter(status="active", account__status="active")
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,

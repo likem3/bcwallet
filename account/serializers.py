@@ -12,7 +12,8 @@ from django.db import transaction as app_transaction
 from django.conf import settings as app_settings
 
 
-class CreateAccountSerializer(serializers.ModelSerializer):
+class AccountSerializer(serializers.ModelSerializer):
+    merchant = MerchantSerializer(many=False, read_only=True)
     merchant_code = serializers.IntegerField(
         min_value=1000,
         write_only=True,
@@ -21,8 +22,13 @@ class CreateAccountSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Account
-        fields = Account.get_fields(excludes=["wallets", "account_transactions"], extras=["merchant_code"])
-        read_only_fields = Account.get_fields(excludes=["user_id", "email", "username", "merchant_code"])
+        fields = model.get_fields(excludes=["wallets", "account_transactions"], extras=["merchant_code"])
+        read_only_fields = model.get_fields(excludes=["user_id", "email", "username", "merchant_code"])
+
+    def update(self, instance, validated_data):
+        # Disable updating the user_id field
+        validated_data.pop("user_id", None)
+        return super().update(instance, validated_data)
 
     def validate(self, attrs):
         super().validate(attrs)
@@ -41,20 +47,6 @@ class CreateAccountSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Unable to create account")
 
         return account
-
-
-class AccountSerializer(serializers.ModelSerializer):
-    merchant_code = serializers.IntegerField(source="merchant.code", allow_null=True)
-
-    class Meta:
-        model = Account
-        fields = Account.get_fields(excludes=["wallets", "account_transactions", "merchant"], extras=["merchant_code"])
-        read_only_fields = Account.get_fields(excludes=["user_id", "email", "username"])
-
-    def update(self, instance, validated_data):
-        # Disable updating the user_id field
-        validated_data.pop("user_id", None)
-        return super().update(instance, validated_data)
 
     def validate_user_id(self, value):
         if value <= 0:
