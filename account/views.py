@@ -78,7 +78,7 @@ class UserDetailSuspendUserView(generics.RetrieveAPIView):
 
 class WalletListCreateView(generics.ListCreateAPIView):
     # permission_classes = [IsAuthenticated]
-    queryset = Wallet.objects.filter(status="active", account__status="active")
+    queryset = Wallet.objects.filter(status="active", account__status="active").prefetch_related("merchant")
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
