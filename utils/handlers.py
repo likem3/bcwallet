@@ -1,11 +1,12 @@
 import base64
 import os
-import time
+from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
 
 import qrcode
 from PIL import Image
+import uuid
 
 from bcwallet.settings import (
     BASE_DIR,
@@ -27,10 +28,15 @@ def handle_minimum_deposit_amount(symbol):
     return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]) / 10
 
 
-def handle_transaction_code(symbol, user_id, transaction_type="DP"):
+def handle_transaction_code(symbol, user_id, transaction_type="DP", merchant_code=None):
     user_id = str(user_id).zfill(8)
+    unique_id = uuid.uuid4().hex[:6].upper()
+    current_datetime = datetime.now().strftime('%Y%m%d%H%M%S')
     bcode = symbol
-    return f"{transaction_type}{bcode}{user_id}-{int(time.time())}"
+    if not merchant_code:
+        return f"{transaction_type}{bcode}{user_id}-{current_datetime}-{unique_id}"
+
+    return f"{transaction_type}{bcode}{merchant_code}{user_id}-{current_datetime}-{unique_id}"
 
 
 def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):

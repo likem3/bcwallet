@@ -6,12 +6,14 @@ from rest_framework.views import APIView
 
 from apis.addrbank.currency import Currency
 from recharge.models import Transaction
-from recharge.serializers import CurrencySerializer, DepositTransactionSerializer
+from recharge.serializers import CurrencySerializer, DepositTransactionSerializer, UpdateDepositTransactionSerializer
 from utils.paginations import SizePagePagination
+
+from datetime import datetime
 
 
 class CreateDepositTransactionView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(type="deposit", account__status="active")
     serializer_class = DepositTransactionSerializer
     filter_backends = [
@@ -28,16 +30,18 @@ class CreateDepositTransactionView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 
-class TransactionListByUserIDView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Transaction.objects.filter(account__status="active")
-    serializer_class = DepositTransactionSerializer
-    lookup_url_kwarg = "user_id"
+class DetailUpdateDepostiTransactionView(generics.RetrieveUpdateAPIView):
+    queryset = Transaction.objects.filter(type="deposit", account__status="active")
+    serializer_class = UpdateDepositTransactionSerializer
+    lookup_field = "code"
+    allowed_methods = ["GET", "PUT"]
 
-    def get_queryset(self):
-        user_id = self.kwargs.get(self.lookup_url_kwarg)
-        queryset = super(TransactionListByUserIDView, self).get_queryset()
-        return queryset.filter(account__user_id=user_id)
+
+class DetailUpdateDepostiTransactionOriginCodeView(generics.RetrieveUpdateAPIView):
+    queryset = Transaction.objects.filter(type="deposit", account__status="active")
+    serializer_class = UpdateDepositTransactionSerializer
+    lookup_field = "code"
+    allowed_methods = ["GET", "PUT"]
 
 
 class CurrencyListClass(APIView):

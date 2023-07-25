@@ -10,4 +10,5 @@ class MerchantSerializer(serializers.ModelSerializer):
             "updated_at",
             "status",
             "merchant_wallets",
+            "merchant_transactions",
         ])
