@@ -13,9 +13,9 @@ class Address(BaseAddrBank):
     def __init__(self):
         super(Address, self).__init__()
 
-    def get_assign_address(self, currency_id, user_id):
+    def get_assign_address(self, merchant_code, currency_id, user_id):
         url = f"{self.base_url}address/"
-        data = {"currency_id": currency_id, "user_id": user_id}
+        data = {"currency_id": currency_id, "merchant_code":merchant_code, "user_id": user_id}
         api_response = requests.post(url=url, data=data)
         if api_response.status_code not in [200, 201]:
             return
@@ -27,9 +27,9 @@ class Address(BaseAddrBank):
             return network["type"]
         return "mainnet"
 
-    def create_address(self, currency_id, user_id):
+    def create_address(self, merchant_code, currency_id, user_id):
         try:
-            json_response = self.get_assign_address(currency_id, user_id)
+            json_response = self.get_assign_address(merchant_code, currency_id, user_id)
 
             if not json_response:
                 return

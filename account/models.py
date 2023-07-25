@@ -41,7 +41,7 @@ class Account(BaseModel):
     )
 
     def __str__(self):
-        return self.username
+        return f"{str(self.merchant.code)} - {str(self.user_id)}"
 
     class Meta:
         db_table = "account_accounts"
@@ -58,10 +58,13 @@ class Account(BaseModel):
     def get_or_create(cls, merchant_code, user_id, **kwargs):
         merchant = Merchant.objects.get(code=merchant_code)
         user_id = user_id
-        data = {
-            'email': kwargs.pop('email'),
-            'username': kwargs.pop('username')
-        }
+
+        data= {}
+        if kwargs.get('email'):
+            data['email'] = kwargs.pop('email')
+        if kwargs.get('username'):
+            data['username'] = kwargs.pop('username')
+
         try:
             account =  cls.objects.get(
                 merchant=merchant,
@@ -81,13 +84,20 @@ class Account(BaseModel):
             return account
 
 
-
 class Wallet(BaseModel):
     account = models.ForeignKey(
         Account,
         on_delete=models.CASCADE,
         related_name="wallets",
         help_text=HELPER_TEXT["account"],
+    )
+    merchant = models.ForeignKey(
+        Merchant,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="merchant_wallets",
+        help_text=HELPER_TEXT["merchant"]
     )
     user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
     currency_id = models.PositiveIntegerField(help_text=HELPER_TEXT["currency_id"])
@@ -131,9 +141,10 @@ class Wallet(BaseModel):
 
     @classmethod
     @app_transaction.atomic
-    def create_user_wallet(cls, account, user_id, currency_id, status="active"):
+    def create_user_wallet(cls, account, merchant, user_id, currency_id, status="active"):
         query = {
             "account": account,
+            "merchant": merchant,
             "user_id": user_id,
             "currency_id": currency_id,
         }
@@ -141,10 +152,13 @@ class Wallet(BaseModel):
         try:
             return cls.objects.get(**query)
 
-        except Wallet.DoesNotExist:
+        except cls.DoesNotExist:
             handler = AddressHandler()
 
-            handler.create_address(currency_id=currency_id, user_id=user_id)
+            handler.create_address(merchant_code=merchant.code, currency_id=currency_id, user_id=user_id)
+            
+            if not handler._address:
+                return
 
             query["address"] = handler._address
             query["label"] = handler._label

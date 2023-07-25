@@ -20,6 +20,7 @@ class WalletAdmin(BaseAdmin):
     list_display = [
         "address",
         "user_id",
+        "merchant_code",
         "last_balance",
         "balance_change",
         "unit",
@@ -31,14 +32,20 @@ class WalletAdmin(BaseAdmin):
     ordering = ("-created_at",)
     search_fields = ("address",)
 
+    def merchant_code(self, obj):
+        if obj.merchant:
+            return obj.merchant.code
+        return 
+
     def last_balance(self, obj):
         return obj.balance.latest("created_at").amount
+    
 
     def balance_change(self, obj):
         return obj.balance.latest("created_at").amount_change
 
     def unit(self, obj):
-        return obj.balance.latest("created_at").unit
+        return obj.currency_symbol
 
     def time_update(self, obj):
         return obj.balance.latest("created_at").created_at

@@ -77,9 +77,8 @@ class UserDetailSuspendUserView(generics.RetrieveAPIView):
 
 
 class WalletListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
-    serializer_class = WalletSerializer
     filter_backends = [
         DjangoFilterBackend,
         filters.SearchFilter,
@@ -89,6 +88,7 @@ class WalletListCreateView(generics.ListCreateAPIView):
     search_fields = ["user_id", "address", "label"]
     ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id", "label"]
     pagination_class = SizePagePagination
+    serializer_class = WalletSerializer
 
     @swagger_auto_schema(**create_wallet_schema)
     def post(self, request, *args, **kwargs):

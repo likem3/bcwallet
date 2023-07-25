@@ -7,7 +7,7 @@ from bcwallet.settings import HELPER_TEXT
 create_wallet_schema = {
     "request_body": openapi.Schema(
         type=openapi.TYPE_OBJECT,
-        required=["user_id", "currency_id"],
+        required=["user_id", "currency_id", "merchant_code"],
         properties={
             "user_id": openapi.Schema(
                 type=openapi.TYPE_INTEGER, description=HELPER_TEXT["user_id"]
@@ -15,6 +15,11 @@ create_wallet_schema = {
             "currency_id": openapi.Schema(
                 type=openapi.TYPE_INTEGER,
                 description=HELPER_TEXT["currency_id"],
+            ),
+            "merchant_code": openapi.Schema(
+                type=openapi.TYPE_INTEGER,
+                default="1000",
+                description=HELPER_TEXT["merchant_code"],
             ),
         },
     ),
