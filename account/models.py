@@ -4,8 +4,12 @@ from django.db import models
 from django.db import transaction as app_transaction
 
 from apis.addrbank.address import Address as AddressHandler
-from bcwallet.settings import (HELPER_TEXT, LOGO_SETTINGS,
-                               STATUS_CHOICES_MODEL, WALLET_TASK_STATUS)
+from bcwallet.settings import (
+    HELPER_TEXT,
+    LOGO_SETTINGS,
+    STATUS_CHOICES_MODEL,
+    WALLET_TASK_STATUS,
+)
 from merchant.models import Merchant
 from utils.handlers import generate_qrcode_with_logo
 from utils.models import BaseModel

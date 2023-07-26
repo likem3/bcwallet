@@ -1,7 +1,6 @@
 from django.utils.safestring import mark_safe
 
-from account.models import (Account, Wallet, WalletAttribut, WalletBalance,
-                            WalletTask)
+from account.models import Account, Wallet, WalletAttribut, WalletBalance, WalletTask
 from utils.admins import BaseAdmin, admin
 
 

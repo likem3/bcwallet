@@ -6,9 +6,11 @@ from rest_framework.views import APIView
 
 from apis.addrbank.currency import Currency
 from recharge.models import Transaction
-from recharge.serializers import (CurrencySerializer,
-                                  DepositTransactionSerializer,
-                                  UpdateDepositTransactionSerializer)
+from recharge.serializers import (
+    CurrencySerializer,
+    DepositTransactionSerializer,
+    UpdateDepositTransactionSerializer,
+)
 from utils.paginations import SizePagePagination
 
 

@@ -1,11 +1,12 @@
 from cryptoapis import ApiClient, ApiException, Configuration
 from cryptoapis.api import generating_api
-from cryptoapis.model.generate_deposit_address_rb import \
-    GenerateDepositAddressRB
-from cryptoapis.model.generate_deposit_address_rb_data import \
-    GenerateDepositAddressRBData
-from cryptoapis.model.generate_deposit_address_rb_data_item import \
-    GenerateDepositAddressRBDataItem
+from cryptoapis.model.generate_deposit_address_rb import GenerateDepositAddressRB
+from cryptoapis.model.generate_deposit_address_rb_data import (
+    GenerateDepositAddressRBData,
+)
+from cryptoapis.model.generate_deposit_address_rb_data_item import (
+    GenerateDepositAddressRBDataItem,
+)
 
 from apis.cryptoapi import BaseCryptoAPI
 from bcwallet.settings import CRYPTOAPI_MASTER_WALLET
