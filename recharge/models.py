@@ -1,14 +1,14 @@
 from datetime import timedelta
 
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils import timezone
 
 from account.models import Account, Wallet
 from bcwallet.settings import HELPER_TEXT, TRANSACTION_STATUS, TRANSACTION_TYPE_OPTION
-from utils.handlers import handle_transaction_code, handle_url_parameter
-from utils.models import ExtraBaseModel
 from merchant.models import Merchant
-from django.core.validators import URLValidator
+from utils.handlers import handle_transaction_code
+from utils.models import ExtraBaseModel
 
 
 class Transaction(ExtraBaseModel):
@@ -117,7 +117,7 @@ class Transaction(ExtraBaseModel):
         null=True,
         blank=True,
         unique=True,
-        help_text=HELPER_TEXT["trx_transaction_id"]
+        help_text=HELPER_TEXT["trx_transaction_id"],
     )
     type = models.CharField(
         max_length=20,
@@ -133,14 +133,14 @@ class Transaction(ExtraBaseModel):
         blank=True,
         default=None,
         related_name="merchant_transactions",
-        help_text=HELPER_TEXT["merchant"]
+        help_text=HELPER_TEXT["merchant"],
     )
     callback_url = models.TextField(
         max_length=1000,
         validators=[URLValidator()],
         null=True,
         blank=True,
-        help_text=HELPER_TEXT['trx_callback_url']
+        help_text=HELPER_TEXT["trx_callback_url"],
     )
 
     def __str__(self):
@@ -170,7 +170,7 @@ class Transaction(ExtraBaseModel):
                 symbol=wallet.currency_symbol,
                 user_id=account.user_id,
                 transaction_type="DP",
-                merchant_code=merchant.code
+                merchant_code=merchant.code,
             ),
             "account": account,
             "merchant": merchant,

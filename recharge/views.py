@@ -6,14 +6,16 @@ from rest_framework.views import APIView
 
 from apis.addrbank.currency import Currency
 from recharge.models import Transaction
-from recharge.serializers import CurrencySerializer, DepositTransactionSerializer, UpdateDepositTransactionSerializer
+from recharge.serializers import (
+    CurrencySerializer,
+    DepositTransactionSerializer,
+    UpdateDepositTransactionSerializer
+)
 from utils.paginations import SizePagePagination
-
-from datetime import datetime
 
 
 class CreateDepositTransactionView(generics.ListCreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Transaction.objects.filter(type="deposit", account__status="active")
     serializer_class = DepositTransactionSerializer
     filter_backends = [

@@ -1,5 +1,4 @@
 import json
-import time
 
 from django.conf import settings
 from faker import Faker

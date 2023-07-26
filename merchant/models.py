@@ -6,22 +6,22 @@ from django.core.validators import MinValueValidator
 
 
 class Merchant(BaseModel):
-    code=models.PositiveIntegerField(
+    code = models.PositiveIntegerField(
         unique=True,
         help_text=app_settings.HELPER_TEXT["merchant_code"],
-        validators=[MinValueValidator(1000)]
+        validators=[MinValueValidator(1000)],
     )
-    name=models.CharField(
+    name = models.CharField(
         max_length=20,
         null=True,
         blank=True,
-        help_text=app_settings.HELPER_TEXT['merchant_name'],
+        help_text=app_settings.HELPER_TEXT["merchant_name"],
     )
     status = models.CharField(
         max_length=20,
         choices=app_settings.STATUS_CHOICES_MODEL,
         default="active",
-        help_text=app_settings.HELPER_TEXT['merchant_status'],
+        help_text=app_settings.HELPER_TEXT["merchant_status"],
     )
 
     def __str__(self):
@@ -32,11 +32,7 @@ class Merchant(BaseModel):
         ordering = ["-created_at"]
 
     @classmethod
-    def create_merchant(cls, code, name=None, status='active'):
-        merchant = cls.objects.create(
-            code=code,
-            name=name,
-            status=status
-        )
+    def create_merchant(cls, code, name=None, status="active"):
+        merchant = cls.objects.create(code=code, name=name, status=status)
 
         return merchant

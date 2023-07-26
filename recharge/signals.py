@@ -4,7 +4,7 @@ from recharge.models import Transaction
 
 
 @receiver(post_save, sender=Transaction)
-def update_transaction_signal(sender, instance , created, **kwargs):
+def update_transaction_signal(sender, instance, created, **kwargs):
     print("sender ==> ", sender)
     print("instance ==> ", instance)
     print("created ==> ", created)

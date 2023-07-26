@@ -1,15 +1,11 @@
-import uuid
-
+from django.conf import settings as app_settings
+from django.db import transaction as app_transaction
 from rest_framework import serializers
-from rest_framework.exceptions import ParseError
 
 from account.models import Account, Wallet, WalletAttribut, WalletBalance
 from apis.addrbank.currency import Currency
-from merchant.serializers import MerchantSerializer
 from merchant.models import Merchant
-
-from django.db import transaction as app_transaction
-from django.conf import settings as app_settings
+from merchant.serializers import MerchantSerializer
 
 
 class AccountSerializer(serializers.ModelSerializer):
@@ -17,13 +13,17 @@ class AccountSerializer(serializers.ModelSerializer):
     merchant_code = serializers.IntegerField(
         min_value=1000,
         write_only=True,
-        help_text=app_settings.HELPER_TEXT["merchant_code"]
+        help_text=app_settings.HELPER_TEXT["merchant_code"],
     )
 
     class Meta:
         model = Account
-        fields = model.get_fields(excludes=["wallets", "account_transactions"], extras=["merchant_code"])
-        read_only_fields = model.get_fields(excludes=["user_id", "email", "username", "merchant_code"])
+        fields = model.get_fields(
+            excludes=["wallets", "account_transactions"], extras=["merchant_code"]
+        )
+        read_only_fields = model.get_fields(
+            excludes=["user_id", "email", "username", "merchant_code"]
+        )
 
     def update(self, instance, validated_data):
         # Disable updating the user_id field
@@ -33,15 +33,15 @@ class AccountSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         super().validate(attrs)
         merchant_code = attrs["merchant_code"]
-        if not Merchant.objects.filter(status='active', code=merchant_code).exists():
-            raise serializers.ValidationError({"merchant_code": "Invalid merchant code"})
+        if not Merchant.objects.filter(status="active", code=merchant_code).exists():
+            raise serializers.ValidationError(
+                {"merchant_code": "Invalid merchant code"}
+            )
 
         return attrs
 
     def create(self, validated_data):
-        account = Account.get_or_create(
-            **validated_data
-        )
+        account = Account.get_or_create(**validated_data)
 
         if not account:
             raise serializers.ValidationError("Unable to create account")
@@ -86,7 +86,7 @@ class WalletSerializer(serializers.ModelSerializer):
     merchant_code = serializers.IntegerField(
         min_value=1000,
         write_only=True,
-        help_text=app_settings.HELPER_TEXT["merchant_code"]
+        help_text=app_settings.HELPER_TEXT["merchant_code"],
     )
 
     class Meta:
@@ -95,7 +95,9 @@ class WalletSerializer(serializers.ModelSerializer):
             excludes=["wallet_transactions", "wallet_tasks"],
             extras=["attributs", "balance", "merchant_code"],
         )
-        read_only_fields = model.get_fields(excludes=["user_id", "currency_id", "merchant_code"])
+        read_only_fields = model.get_fields(
+            excludes=["user_id", "currency_id", "merchant_code"]
+        )
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -110,7 +112,9 @@ class WalletSerializer(serializers.ModelSerializer):
     def validate(self, data):
         merchant_code = data["merchant_code"]
         if not Merchant.objects.filter(code=merchant_code, status="active").exists():
-            raise serializers.ValidationError({"merchant_code": "Invalid merchant code"})
+            raise serializers.ValidationError(
+                {"merchant_code": "Invalid merchant code"}
+            )
 
         handdler = Currency()
         currenccy = handdler.get_currency_detail(data["currency_id"])
@@ -123,7 +127,9 @@ class WalletSerializer(serializers.ModelSerializer):
     @app_transaction.atomic
     def create(self, validated_data):
         merchant = Merchant.objects.get(code=validated_data.pop("merchant_code"))
-        account = Account.get_or_create(merchant_code=merchant.code, user_id=validated_data["user_id"])
+        account = Account.get_or_create(
+            merchant_code=merchant.code, user_id=validated_data["user_id"]
+        )
         try:
             wallet = Wallet.create_user_wallet(
                 account=account,
@@ -135,4 +141,5 @@ class WalletSerializer(serializers.ModelSerializer):
             return wallet
 
         except Exception as e:
+            print(str(e))
             raise serializers.ValidationError({"creating address": "Server error!"})

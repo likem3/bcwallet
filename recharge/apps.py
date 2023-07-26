@@ -6,4 +6,4 @@ class RechargeConfig(AppConfig):
     name = "recharge"
 
     def ready(self):
-        import recharge.signals
+        import recharge.signals  # noqa: F401

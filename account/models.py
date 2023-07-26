@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.db import transaction as app_transaction
 
@@ -11,7 +13,7 @@ from bcwallet.settings import (
 from merchant.models import Merchant
 from utils.handlers import generate_qrcode_with_logo
 from utils.models import BaseModel
-import uuid
+
 
 class Account(BaseModel):
     uuid = models.UUIDField(
@@ -21,10 +23,18 @@ class Account(BaseModel):
         unique=False, help_text=HELPER_TEXT["account_user_id"]
     )
     email = models.EmailField(
-        unique=False, max_length=100, blank=True, null=True, help_text=HELPER_TEXT["account_email"]
+        unique=False,
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=HELPER_TEXT["account_email"],
     )
     username = models.CharField(
-        max_length=255, unique=False, blank=True, null=True, help_text=HELPER_TEXT["account_username"]
+        max_length=255,
+        unique=False,
+        blank=True,
+        null=True,
+        help_text=HELPER_TEXT["account_username"],
     )
     status = models.CharField(
         max_length=20,
@@ -50,8 +60,9 @@ class Account(BaseModel):
     @classmethod
     def client_merchant(self):
         try:
-            return self.merchants_set.latest('created_at')
-        except:
+            return self.merchants_set.latest("created_at")
+        except Exception as e:
+            print(str(e))
             return None
 
     @classmethod
@@ -59,17 +70,14 @@ class Account(BaseModel):
         merchant = Merchant.objects.get(code=merchant_code)
         user_id = user_id
 
-        data= {}
-        if kwargs.get('email'):
-            data['email'] = kwargs.pop('email')
-        if kwargs.get('username'):
-            data['username'] = kwargs.pop('username')
+        data = {}
+        if kwargs.get("email"):
+            data["email"] = kwargs.pop("email")
+        if kwargs.get("username"):
+            data["username"] = kwargs.pop("username")
 
         try:
-            account =  cls.objects.get(
-                merchant=merchant,
-                user_id=user_id
-            )
+            account = cls.objects.get(merchant=merchant, user_id=user_id)
 
             return account
 
@@ -79,7 +87,7 @@ class Account(BaseModel):
                 merchant=merchant,
                 user_id=user_id,
                 status="active",
-                **data
+                **data,
             )
             return account
 
@@ -97,7 +105,7 @@ class Wallet(BaseModel):
         null=True,
         blank=True,
         related_name="merchant_wallets",
-        help_text=HELPER_TEXT["merchant"]
+        help_text=HELPER_TEXT["merchant"],
     )
     user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
     currency_id = models.PositiveIntegerField(help_text=HELPER_TEXT["currency_id"])
@@ -141,7 +149,9 @@ class Wallet(BaseModel):
 
     @classmethod
     @app_transaction.atomic
-    def create_user_wallet(cls, account, merchant, user_id, currency_id, status="active"):
+    def create_user_wallet(
+        cls, account, merchant, user_id, currency_id, status="active"
+    ):
         query = {
             "account": account,
             "merchant": merchant,
@@ -155,8 +165,10 @@ class Wallet(BaseModel):
         except cls.DoesNotExist:
             handler = AddressHandler()
 
-            handler.create_address(merchant_code=merchant.code, currency_id=currency_id, user_id=user_id)
-            
+            handler.create_address(
+                merchant_code=merchant.code, currency_id=currency_id, user_id=user_id
+            )
+
             if not handler._address:
                 return
 

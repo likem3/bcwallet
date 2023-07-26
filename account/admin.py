@@ -35,11 +35,10 @@ class WalletAdmin(BaseAdmin):
     def merchant_code(self, obj):
         if obj.merchant:
             return obj.merchant.code
-        return 
+        return
 
     def last_balance(self, obj):
         return obj.balance.latest("created_at").amount
-    
 
     def balance_change(self, obj):
         return obj.balance.latest("created_at").amount_change

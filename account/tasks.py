@@ -101,6 +101,7 @@ def update_wallet_balance():
     success_task_id = []
     transactions_candidate = {}
     balance_update_created_at = []
+    new_balance_objs = []
 
     for candidate in candidates:
         affected_wallet_id.append(candidate.wallet.id)
@@ -143,7 +144,7 @@ def update_wallet_balance():
 
         print(f"lb: {last_balance_amount}\nbn:{balance}")
         if last_balance_amount == balance:
-            if not candidate.transaction_code and balance:
+            if not candidate.transaction_code and balance is not None:
                 candidate.status = "cancel"
                 candidate.attemp = candidate.attemp
 
@@ -151,6 +152,15 @@ def update_wallet_balance():
                     last_balance.created_at = timezone.now()
                     last_balance.updated_at = timezone.now()
                     balance_update_created_at.append(last_balance)
+                else:
+                    new_balance_objs.append(
+                        WalletBalance(
+                            wallet=wallet,
+                            amount=balance,
+                            unit=symbol,
+                            last_updated_at=timezone.now(),
+                        )
+                    )
 
             else:
                 candidate.status = candidate.status
@@ -196,6 +206,9 @@ def update_wallet_balance():
             WalletBalance.objects.bulk_update(
                 balance_update_created_at, ["created_at", "updated_at"]
             )
+
+        if new_balance_objs:
+            WalletBalance.objects.bulk_create(new_balance_objs)
 
         return {
             "affected_wallet_id": affected_wallet_id,

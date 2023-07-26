@@ -5,25 +5,29 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from account.models import Account, Wallet
-from account.schemas import create_account_schema, create_wallet_schema, get_account_list_schema
+from account.schemas import (
+    create_account_schema,
+    create_wallet_schema,
+    get_account_list_schema,
+)
 from account.serializers import AccountSerializer, WalletSerializer
 from utils.paginations import SizePagePagination
 from utils.mixins import DetailMultipleFieldLookupMixin
 
 
 class UserListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["merchant__code", "user_id", "email", "username"]
     ordering_fields = ["id", "-id", "created_at", "-created_at", "user_id"]
     pagination_class = SizePagePagination
-    serializer_class =AccountSerializer
+    serializer_class = AccountSerializer
 
     @swagger_auto_schema(**get_account_list_schema)
     def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
-    
+
     @swagger_auto_schema(**create_account_schema)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -41,15 +45,17 @@ class UserDetailSuspendView(generics.RetrieveDestroyAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserDetailMerchantView(DetailMultipleFieldLookupMixin, generics.RetrieveDestroyAPIView):
-    # permission_classes = [IsAuthenticated]
+class UserDetailMerchantView(
+    DetailMultipleFieldLookupMixin, generics.RetrieveDestroyAPIView
+):
+    permission_classes = [IsAuthenticated]
     queryset = Account.objects.filter(status="active")
     serializer_class = AccountSerializer
     lookup_query_fields = {
-        'merchant_code': 'merchant__code',
-        'user_id': 'user_id',
+        "merchant_code": "merchant__code",
+        "user_id": "user_id",
     }
-    lookup_fields = ['merchant_code', 'user_id']
+    lookup_fields = ["merchant_code", "user_id"]
 
     @swagger_auto_schema(operation_id="merchant_user_read")
     def get(self, request, *args, **kwargs):
@@ -77,7 +83,7 @@ class UserDetailSuspendUserView(generics.RetrieveAPIView):
 
 
 class WalletListCreateView(generics.ListCreateAPIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     filter_backends = [
         DjangoFilterBackend,

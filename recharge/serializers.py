@@ -1,6 +1,9 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings as app_settings
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import transaction as model_transaction
 from django.utils import timezone
 from rest_framework import serializers
@@ -10,22 +13,17 @@ from account.models import Wallet as AccountWallet
 from account.serializers import WalletAttributSerializer
 from account.tasks import create_wallet_task
 from apis.addrbank.currency import Currency
-from django.conf import settings as app_settings
-from recharge.models import Transaction
-from utils.handlers import handle_minimum_deposit_amount
 from merchant.models import Merchant
 from merchant.serializers import MerchantSerializer
-
-from django.core.validators import URLValidator
-from django.core.exceptions import ValidationError
-from datetime import datetime
+from recharge.models import Transaction
+from utils.handlers import handle_minimum_deposit_amount
 
 
 class DepositTransactionSerializer(serializers.ModelSerializer):
     merchant_code = serializers.IntegerField(
         min_value=1000,
         write_only=True,
-        help_text=app_settings.HELPER_TEXT["merchant_code"]
+        help_text=app_settings.HELPER_TEXT["merchant_code"],
     )
     user_id = serializers.IntegerField(
         min_value=1, write_only=True, help_text=app_settings.HELPER_TEXT["user_id"]
@@ -34,7 +32,9 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         min_value=1, write_only=True, help_text=app_settings.HELPER_TEXT["currency_id"]
     )
     amount = serializers.DecimalField(
-        max_digits=25, decimal_places=10, help_text=app_settings.HELPER_TEXT["trx_amount"]
+        max_digits=25,
+        decimal_places=10,
+        help_text=app_settings.HELPER_TEXT["trx_amount"],
     )
     callback_url = serializers.CharField(
         help_text=app_settings.HELPER_TEXT["trx_callback_url"]
@@ -86,12 +86,16 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
             try:
                 validator(callback_url)
             except ValidationError:
-                raise serializers.ValidationError({"callback_url": "Invalid callback url"})
+                raise serializers.ValidationError(
+                    {"callback_url": "Invalid callback url"}
+                )
 
         try:
             self._merchant = Merchant.objects.get(code=merchant_code, status="active")
         except Merchant.DoesNotExist:
-            raise serializers.ValidationError({"merchant_code": "Invalid merchant code"})
+            raise serializers.ValidationError(
+                {"merchant_code": "Invalid merchant code"}
+            )
 
         handdler = Currency()
         self._currency = handdler.get_currency_detail(currency_id)
@@ -128,7 +132,9 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         }
 
         try:
-            self._wallet = self._account.wallets.get(currency_id=self._currency.get('id'))
+            self._wallet = self._account.wallets.get(
+                currency_id=self._currency.get("id")
+            )
 
         except AccountWallet.DoesNotExist:
             user_wallet = AccountWallet.create_user_wallet(**query)
@@ -163,9 +169,8 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         query["currency_blockchain"] = self._wallet.currency_blockchain
         query["currency_std"] = self._wallet.currency_std
         query["callback_url"] = validated_data["callback_url"]
-        if validated_data.get('origin_code'):
+        if validated_data.get("origin_code"):
             query["origin_code"] = validated_data["origin_code"]
-
 
         try:
             transaction = Transaction.create_deposit_transaction(**query)
@@ -211,7 +216,7 @@ class UpdateDepositTransactionSerializer(serializers.ModelSerializer):
     def get_detail(self, obj):
         attributs_data = WalletAttributSerializer(obj.wallet.attributs).data
         return attributs_data
-    
+
     def get_merchant(self, obj):
         merchant_data = MerchantSerializer(obj.merchant).data
         return merchant_data
