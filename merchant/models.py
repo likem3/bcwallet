@@ -1,8 +1,8 @@
-from django.db import models
-from utils.models import BaseModel
-
 from django.conf import settings as app_settings
 from django.core.validators import MinValueValidator
+from django.db import models
+
+from utils.models import BaseModel
 
 
 class Merchant(BaseModel):

@@ -5,14 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from account.models import Account, Wallet
-from account.schemas import (
-    create_account_schema,
-    create_wallet_schema,
-    get_account_list_schema,
-)
+from account.schemas import (create_account_schema, create_wallet_schema,
+                             get_account_list_schema)
 from account.serializers import AccountSerializer, WalletSerializer
-from utils.paginations import SizePagePagination
 from utils.mixins import DetailMultipleFieldLookupMixin
+from utils.paginations import SizePagePagination
 
 
 class UserListCreateView(generics.ListCreateAPIView):

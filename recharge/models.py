@@ -5,7 +5,8 @@ from django.db import models
 from django.utils import timezone
 
 from account.models import Account, Wallet
-from bcwallet.settings import HELPER_TEXT, TRANSACTION_STATUS, TRANSACTION_TYPE_OPTION
+from bcwallet.settings import (HELPER_TEXT, TRANSACTION_STATUS,
+                               TRANSACTION_TYPE_OPTION)
 from merchant.models import Merchant
 from utils.handlers import handle_transaction_code
 from utils.models import ExtraBaseModel

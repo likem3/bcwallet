@@ -10,7 +10,6 @@ from django.utils import timezone
 from account.models import Wallet, WalletBalance, WalletTask
 from apis import Switcher
 from recharge.models import Transaction
-
 from recharge.tasks import update_transactions_status_success
 
 

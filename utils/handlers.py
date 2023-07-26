@@ -10,12 +10,8 @@ import qrcode
 from django.utils import timezone
 from PIL import Image
 
-from bcwallet.settings import (
-    BASE_DIR,
-    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
-    BLOCKCHAIN_NETWORK_MAP,
-    ENVIRONMENT_SETTING
-)
+from bcwallet.settings import (BASE_DIR, BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
+                               BLOCKCHAIN_NETWORK_MAP, ENVIRONMENT_SETTING)
 
 
 def handle_blockchain_network(blockchain):

@@ -1,9 +1,8 @@
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import (TokenObtainPairView,
+                                            TokenRefreshView)
 
-from auth.serializers import (
-    CustomTokenObtainPairSerializer,
-    CustomTokenRefreshSerializer,
-)
+from auth.serializers import (CustomTokenObtainPairSerializer,
+                              CustomTokenRefreshSerializer)
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

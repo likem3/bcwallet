@@ -4,7 +4,6 @@ from rest_framework import status
 from account.serializers import AccountSerializer, WalletSerializer
 from bcwallet.settings import HELPER_TEXT
 
-
 create_account_schema = {
     "request_body": openapi.Schema(
         type=openapi.TYPE_OBJECT,

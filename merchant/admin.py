@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from merchant.models import Merchant
 from utils.admins import BaseAdmin
 
