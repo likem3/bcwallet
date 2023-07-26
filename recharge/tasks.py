@@ -42,7 +42,7 @@ def update_transactions_status_success(transactions_data={}):
                 trx.status = "completed"
                 url = get_transaction_notif_url(trx=trx, status="completed")
                 if url:
-                    execute_callback_url_transaction.delay(args=(url,))
+                    execute_callback_url_transaction.delay(url)
 
                 trx_update_data.append(trx)
                 trx_ids_updated.append({trx.code: balance_in})

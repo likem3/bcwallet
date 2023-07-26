@@ -169,7 +169,7 @@ class Transaction(ExtraBaseModel):
             "code": handle_transaction_code(
                 symbol=wallet.currency_symbol,
                 user_id=account.user_id,
-                transaction_type="DP",
+                trx_type="DP",
                 merchant_code=merchant.code,
             ),
             "account": account,
