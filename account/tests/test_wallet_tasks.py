@@ -1,15 +1,12 @@
-from unittest.mock import patch
-
-from django.urls import reverse
 from faker import Faker
 from model_bakery import baker
-from rest_framework import status
 
 from account.models import Account, Wallet, WalletTask
-from recharge.models import Transaction
-from account.tests.response_mock import Currency
-from utils.tests import TestSetup
 from account.tasks import create_wallet_task
+from account.tests.response_mock import Currency
+from recharge.models import Transaction
+from utils.tests import TestSetup
+
 
 class WalletTaskTestCase(TestSetup):
     def setUp(self):
@@ -22,22 +19,17 @@ class WalletTaskTestCase(TestSetup):
             Wallet,
             account=self.account,
             user_id=self.account.user_id,
-            currency_id=self.currency.get_currency('BTC')['id'],
-            status='active'
+            currency_id=self.currency.get_currency("BTC")["id"],
+            status="active",
         )
 
     def test_create_wallet_task_from_transaction_success(self):
-        transaction1 = baker.make(
-            Transaction,
-            wallet=self.wallet,
-            status='pending'
-        )
+        transaction1 = baker.make(Transaction, wallet=self.wallet, status="pending")
 
         create_wallet_task(transaction1.code)
 
         wallet_task = WalletTask.objects.filter(
-            transaction_code=transaction1.code,
-            wallet=self.wallet
+            transaction_code=transaction1.code, wallet=self.wallet
         )
 
         self.assertIsNone(None, wallet_task)

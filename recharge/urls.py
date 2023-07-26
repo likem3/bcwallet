@@ -3,7 +3,8 @@ from django.urls import path
 from recharge.views import (
     CreateDepositTransactionView,
     CurrencyListClass,
-    TransactionListByUserIDView,
+    DetailUpdateDepostiTransactionOriginCodeView,
+    DetailUpdateDepostiTransactionView,
 )
 
 urlpatterns = [
@@ -13,9 +14,14 @@ urlpatterns = [
         name="create-deposit-transaction",
     ),
     path(
-        "transactions/user/<int:user_id>/",
-        TransactionListByUserIDView.as_view(),
-        name="user-transaction-list",
+        "transactions/deposit/<str:code>",
+        DetailUpdateDepostiTransactionView.as_view(),
+        name="detail-deposit-transaction",
+    ),
+    path(
+        "transactions/deposit/origin/<str:origin_code>/",
+        DetailUpdateDepostiTransactionOriginCodeView.as_view(),
+        name="detail-deposit-transaction-origin",
     ),
     path("currencies/", CurrencyListClass.as_view(), name="currency-list"),
 ]

@@ -196,8 +196,13 @@ HELPER_TEXT = {
     "trx_expired_at": "The expiration of the transaction before it gets ignored",
     "trx_transaction_id": "The transaction hash (txid)",
     "trx_type": "The transaction type",
+    "trx_callback_url": "Callback url when transactions status change",
     "wtt_transaction_code": "Transaction code related",
     "wtt_wallet_id": "Wallet id related",
     "wtt_attemp": "Number of attemp running task",
     "wtt_status": "Status task",
+    "merchant": "merchant of the system",
+    "merchant_code": "Merchant code identifier",
+    "merchant_name": "Merchant name",
+    "merchant_status": "Merchant status",
 }

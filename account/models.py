@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.db import transaction as app_transaction
 
@@ -8,6 +10,7 @@ from bcwallet.settings import (
     STATUS_CHOICES_MODEL,
     WALLET_TASK_STATUS,
 )
+from merchant.models import Merchant
 from utils.handlers import generate_qrcode_with_logo
 from utils.models import BaseModel
 
@@ -17,13 +20,21 @@ class Account(BaseModel):
         unique=True, editable=False, help_text=HELPER_TEXT["account_uuid"]
     )
     user_id = models.PositiveIntegerField(
-        unique=True, help_text=HELPER_TEXT["account_user_id"]
+        unique=False, help_text=HELPER_TEXT["account_user_id"]
     )
     email = models.EmailField(
-        unique=True, max_length=100, help_text=HELPER_TEXT["account_email"]
+        unique=False,
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text=HELPER_TEXT["account_email"],
     )
     username = models.CharField(
-        max_length=255, unique=True, help_text=HELPER_TEXT["account_username"]
+        max_length=255,
+        unique=False,
+        blank=True,
+        null=True,
+        help_text=HELPER_TEXT["account_username"],
     )
     status = models.CharField(
         max_length=20,
@@ -31,13 +42,54 @@ class Account(BaseModel):
         default="nonactive",
         help_text="status of the account",
     )
+    merchant = models.ForeignKey(
+        Merchant,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["merchant"],
+    )
 
     def __str__(self):
-        return self.username
+        return f"{str(self.merchant.code)} - {str(self.user_id)}"
 
     class Meta:
         db_table = "account_accounts"
         ordering = ["-created_at"]
+
+    @classmethod
+    def client_merchant(self):
+        try:
+            return self.merchants_set.latest("created_at")
+        except Exception as e:
+            print(str(e))
+            return None
+
+    @classmethod
+    def get_or_create(cls, merchant_code, user_id, **kwargs):
+        merchant = Merchant.objects.get(code=merchant_code)
+        user_id = user_id
+
+        data = {}
+        if kwargs.get("email"):
+            data["email"] = kwargs.pop("email")
+        if kwargs.get("username"):
+            data["username"] = kwargs.pop("username")
+
+        try:
+            account = cls.objects.get(merchant=merchant, user_id=user_id)
+
+            return account
+
+        except cls.DoesNotExist:
+            account = cls.objects.create(
+                uuid=uuid.uuid4(),
+                merchant=merchant,
+                user_id=user_id,
+                status="active",
+                **data,
+            )
+            return account
 
 
 class Wallet(BaseModel):
@@ -46,6 +98,14 @@ class Wallet(BaseModel):
         on_delete=models.CASCADE,
         related_name="wallets",
         help_text=HELPER_TEXT["account"],
+    )
+    merchant = models.ForeignKey(
+        Merchant,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="merchant_wallets",
+        help_text=HELPER_TEXT["merchant"],
     )
     user_id = models.PositiveIntegerField(help_text=HELPER_TEXT["user_id"])
     currency_id = models.PositiveIntegerField(help_text=HELPER_TEXT["currency_id"])
@@ -89,9 +149,12 @@ class Wallet(BaseModel):
 
     @classmethod
     @app_transaction.atomic
-    def create_user_wallet(cls, account, user_id, currency_id, status="active"):
+    def create_user_wallet(
+        cls, account, merchant, user_id, currency_id, status="active"
+    ):
         query = {
             "account": account,
+            "merchant": merchant,
             "user_id": user_id,
             "currency_id": currency_id,
         }
@@ -99,10 +162,15 @@ class Wallet(BaseModel):
         try:
             return cls.objects.get(**query)
 
-        except Wallet.DoesNotExist:
+        except cls.DoesNotExist:
             handler = AddressHandler()
 
-            handler.create_address(currency_id=currency_id, user_id=user_id)
+            handler.create_address(
+                merchant_code=merchant.code, currency_id=currency_id, user_id=user_id
+            )
+
+            if not handler._address:
+                return
 
             query["address"] = handler._address
             query["label"] = handler._label

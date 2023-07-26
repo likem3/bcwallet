@@ -1,4 +1,4 @@
-from bcwallet.settings import CRYPTOAPI_BASE_URL, CRYPTOAPI_API_KEY, CRYPTOAPI_VERSION
+from bcwallet.settings import CRYPTOAPI_API_KEY, CRYPTOAPI_BASE_URL, CRYPTOAPI_VERSION
 
 
 class BaseCryptoAPI:
