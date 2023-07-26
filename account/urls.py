@@ -24,7 +24,7 @@ urlpatterns = [
     path("wallets/", WalletListCreateView.as_view(), name="wallets-list-create"),
     path("wallets/<int:pk>/", WalletDetailView.as_view(), name="wallets-detail"),
     path(
-        "wallets/user/<int:user_id>/",
+        "wallets/<int:merchant_code>/<int:user_id>/",
         WalletListByUserIDView.as_view(),
         name="wallets-user-list",
     ),

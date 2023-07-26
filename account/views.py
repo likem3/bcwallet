@@ -11,7 +11,7 @@ from account.schemas import (
     get_account_list_schema,
 )
 from account.serializers import AccountSerializer, WalletSerializer
-from utils.mixins import DetailMultipleFieldLookupMixin
+from utils.mixins import DetailMultipleFieldLookupMixin, ListMultipleFieldLookupMixin
 from utils.paginations import SizePagePagination
 
 
@@ -107,10 +107,19 @@ class WalletDetailView(generics.RetrieveAPIView):
     serializer_class = WalletSerializer
 
 
-class WalletListByUserIDView(generics.ListAPIView):
+class WalletListByUserIDView(ListMultipleFieldLookupMixin, generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Wallet.objects.filter(status="active", account__status="active")
     serializer_class = WalletSerializer
+    lookup_query_fields = {
+        "merchant_code": "merchant__code",
+        "user_id": "user_id",
+    }
+    lookup_fields = ["merchant_code", "user_id"]
 
     def get_queryset(self):
         return self.queryset.filter(account__user_id=self.kwargs.pop("user_id"))
+
+    @swagger_auto_schema(operation_id="merchant_user_wallet_read")
+    def get(self, request, *args, **kwargs):
+        return super().get(request, *args, **kwargs)

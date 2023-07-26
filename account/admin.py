@@ -15,6 +15,8 @@ class AccountAdmin(BaseAdmin):
     ordering = ("-created_at",)
     search_fields = ("user_id", "email", "username")
 
+    list_filter  = ("created_at", "status", "merchant__code")
+
 
 class WalletAdmin(BaseAdmin):
     list_display = [
@@ -31,6 +33,8 @@ class WalletAdmin(BaseAdmin):
     ]
     ordering = ("-created_at",)
     search_fields = ("address",)
+
+    list_filter = ("status", "network", "currency_std", "currency_symbol", "merchant__code")
 
     def merchant_code(self, obj):
         if obj.merchant:
@@ -62,6 +66,8 @@ class WalletTaskAdmin(BaseAdmin):
     ]
     ordering = ("-created_at",)
     search_fields = ("wallet__address", "wallet__user_id", "transaction_code", "status")
+
+    list_filter = ("created_at", "status", "wallet__merchant__code")
 
     @admin.display(ordering="wallet__address", description="Address")
     def get_wallet_address(self, obj):
