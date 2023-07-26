@@ -1,11 +1,16 @@
 from drf_yasg import generators, openapi
 from drf_yasg.views import get_schema_view
+from django.conf import settings as app_settings
 
 
 class BothHttpAndHttpsSchemaGenerator(generators.OpenAPISchemaGenerator):
     def get_schema(self, request=None, public=False):
         schema = super().get_schema(request, public)
-        schema.schemes = ["http", "https"]
+        if app_settings.ENVIRONMENT_SETTING == "local":
+            schema.schemes = ["http"]
+        else:
+            schema.schemes = ["https"]
+
         return schema
 
 

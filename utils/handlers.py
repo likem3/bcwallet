@@ -1,10 +1,13 @@
 import base64
 import os
-import time
+import uuid
+from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
 import qrcode
+from django.utils import timezone
 from PIL import Image
 
 from bcwallet.settings import (
@@ -27,10 +30,15 @@ def handle_minimum_deposit_amount(symbol):
     return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]) / 10
 
 
-def handle_transaction_code(symbol, user_id, transaction_type="DP"):
+def handle_transaction_code(symbol, user_id, trx_type="DP", merchant_code=None):
     user_id = str(user_id).zfill(8)
-    bcode = symbol
-    return f"{transaction_type}{bcode}{user_id}-{int(time.time())}"
+    uniq = uuid.uuid4().hex[:6].upper()
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    if not merchant_code:
+        return f"{trx_type}{symbol}{user_id}-{now}-{uniq}"
+
+    return f"{trx_type}{symbol}{merchant_code}{user_id}-{now}-{uniq}"
 
 
 def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):
@@ -69,3 +77,47 @@ def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):
     # Encode the image data as base64
     base64_image = base64.b64encode(image_buffer.read()).decode("utf-8")
     return f"data:image/png;base64,{base64_image}"
+
+
+def handle_created_at(utc_time, unix=True):
+    if unix:
+        return int(utc_time.timestamp())
+    return timezone.localtime(utc_time)
+
+
+def handle_url_parameter(url, new_parems={}):
+    parsed_url = urlparse(url)
+    current_params = parse_qs(parsed_url.query)
+    current_params.update(new_parems)
+    updated_query_string = urlencode(current_params, doseq=True)
+
+    updated_url = urlunparse(
+        (
+            parsed_url.scheme,
+            parsed_url.netloc,
+            parsed_url.path,
+            parsed_url.params,
+            updated_query_string,
+            parsed_url.fragment,
+        )
+    )
+
+    return updated_url
+
+
+def get_transaction_notif_url(trx, status=None):
+    query = {
+        "user_id": trx.user_id,
+        "merchant_code": trx.merchant.code,
+        "trx_status": status if status else trx.status,
+        "trx_code": trx.code,
+        "trx_created_at": handle_created_at(utc_time=trx.created_at),
+        "trx_amount": trx.amount,
+    }
+    if trx.origin_code:
+        query["origin_code"] = trx.origin_code
+
+    if trx.callback_url:
+        return handle_url_parameter(url=trx.callback_url, new_parems=query)
+
+    return

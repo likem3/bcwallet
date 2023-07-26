@@ -1,9 +1,9 @@
 from apis.handlers.bitcoin import BTCHandler
-from apis.handlers.ethereum import EthHandler
-from apis.handlers.tron import TronHandler
 from apis.handlers.dogecoin import DOGEHandler
-from apis.handlers.usdttrc20 import USDTTRC20Handler
+from apis.handlers.ethereum import EthHandler
 from apis.handlers.litecoin import LTCHandler
+from apis.handlers.tron import TronHandler
+from apis.handlers.usdttrc20 import USDTTRC20Handler
 
 
 class Switcher:

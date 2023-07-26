@@ -10,6 +10,7 @@ from django.utils import timezone
 from account.models import Wallet, WalletBalance, WalletTask
 from apis import Switcher
 from recharge.models import Transaction
+from recharge.tasks import update_transactions_status_success
 
 
 @shared_task
@@ -99,6 +100,7 @@ def update_wallet_balance():
     success_task_id = []
     transactions_candidate = {}
     balance_update_created_at = []
+    new_balance_objs = []
 
     for candidate in candidates:
         affected_wallet_id.append(candidate.wallet.id)
@@ -141,7 +143,7 @@ def update_wallet_balance():
 
         print(f"lb: {last_balance_amount}\nbn:{balance}")
         if last_balance_amount == balance:
-            if not candidate.transaction_code and balance:
+            if not candidate.transaction_code and balance is not None:
                 candidate.status = "cancel"
                 candidate.attemp = candidate.attemp
 
@@ -149,6 +151,15 @@ def update_wallet_balance():
                     last_balance.created_at = timezone.now()
                     last_balance.updated_at = timezone.now()
                     balance_update_created_at.append(last_balance)
+                else:
+                    new_balance_objs.append(
+                        WalletBalance(
+                            wallet=wallet,
+                            amount=balance,
+                            unit=symbol,
+                            last_updated_at=timezone.now(),
+                        )
+                    )
 
             else:
                 candidate.status = candidate.status
@@ -195,6 +206,9 @@ def update_wallet_balance():
                 balance_update_created_at, ["created_at", "updated_at"]
             )
 
+        if new_balance_objs:
+            WalletBalance.objects.bulk_create(new_balance_objs)
+
         return {
             "affected_wallet_id": affected_wallet_id,
             "success_task_id": success_task_id,
@@ -203,36 +217,3 @@ def update_wallet_balance():
     except Exception as e:
         print(str(e))
         return {"status": "task_failed"}
-
-
-@shared_task
-def update_transactions_status_success(transactions_data={}):
-    transactions = Transaction.objects.filter(
-        code__in=transactions_data.keys(), status="pending"
-    )
-    trx_update_data = []
-    trx_ids_updated = []
-    if transactions:
-        for trx in transactions:
-            balance_in = transactions_data.get(trx.code, 0)
-            if balance_in and Decimal(balance_in) >= Decimal(trx.amount):
-                trx.status = "completed"
-                trx_update_data.append(trx)
-                trx_ids_updated.append({trx.code: balance_in})
-
-    if trx_update_data:
-        Transaction.objects.bulk_update(trx_update_data, ["status"])
-
-    return trx_ids_updated
-
-
-@shared_task
-def update_transaction_status_failed():
-    # Calculate the time threshold (30 minutes ago)
-    threshold = timezone.now() - timedelta(minutes=30)
-
-    num_affected = Transaction.objects.filter(
-        expired_at__lt=threshold, status="pending"
-    ).update(status="failed")
-
-    return {"total_trx_updated_to_fail": num_affected}

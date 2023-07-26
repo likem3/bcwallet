@@ -1,10 +1,12 @@
 from datetime import timedelta
 
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils import timezone
 
 from account.models import Account, Wallet
 from bcwallet.settings import HELPER_TEXT, TRANSACTION_STATUS, TRANSACTION_TYPE_OPTION
+from merchant.models import Merchant
 from utils.handlers import handle_transaction_code
 from utils.models import ExtraBaseModel
 
@@ -21,6 +23,7 @@ class Transaction(ExtraBaseModel):
         max_length=255,
         blank=True,
         null=True,
+        unique=True,
         help_text=HELPER_TEXT["trx_origin_code"],
     )
     account = models.ForeignKey(
@@ -110,7 +113,11 @@ class Transaction(ExtraBaseModel):
         help_text=HELPER_TEXT["trx_expired_at"],
     )
     transaction_id = models.CharField(
-        max_length=255, help_text=HELPER_TEXT["trx_transaction_id"]
+        max_length=255,
+        null=True,
+        blank=True,
+        unique=True,
+        help_text=HELPER_TEXT["trx_transaction_id"],
     )
     type = models.CharField(
         max_length=20,
@@ -118,6 +125,22 @@ class Transaction(ExtraBaseModel):
         blank=True,
         help_text=HELPER_TEXT["trx_type"],
         choices=TRANSACTION_TYPE_OPTION,
+    )
+    merchant = models.ForeignKey(
+        Merchant,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
+        related_name="merchant_transactions",
+        help_text=HELPER_TEXT["merchant"],
+    )
+    callback_url = models.TextField(
+        max_length=1000,
+        validators=[URLValidator()],
+        null=True,
+        blank=True,
+        help_text=HELPER_TEXT["trx_callback_url"],
     )
 
     def __str__(self):
@@ -130,6 +153,7 @@ class Transaction(ExtraBaseModel):
     def create_deposit_transaction(
         cls,
         account,
+        merchant,
         wallet,
         user_id,
         amount,
@@ -138,13 +162,18 @@ class Transaction(ExtraBaseModel):
         currency_symbol,
         currency_blockchain,
         currency_std,
-        transaction_id,
+        callback_url=None,
+        origin_code=None,
     ):
         query = {
             "code": handle_transaction_code(
-                wallet.currency_symbol, account.user_id, "DP"
+                symbol=wallet.currency_symbol,
+                user_id=account.user_id,
+                trx_type="DP",
+                merchant_code=merchant.code,
             ),
             "account": account,
+            "merchant": merchant,
             "wallet": wallet,
             "to_address": wallet.address,
             "from_currency": wallet.attributs.symbol,
@@ -156,10 +185,17 @@ class Transaction(ExtraBaseModel):
             "currency_blockchain": currency_blockchain,
             "currency_std": currency_std,
             "amount": amount,
-            "transaction_id": transaction_id,
+            "callback_url": callback_url,
             "type": "deposit",
             "expired_at": (timezone.now() + timedelta(minutes=30)),
         }
+
+        if callback_url:
+            query["callback_url"] = callback_url
+
+        if origin_code:
+            query["origin_code"] = origin_code
+
         trx = Transaction.objects.create(**query)
 
         return trx

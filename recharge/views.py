@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -6,7 +7,12 @@ from rest_framework.views import APIView
 
 from apis.addrbank.currency import Currency
 from recharge.models import Transaction
-from recharge.serializers import CurrencySerializer, DepositTransactionSerializer
+from recharge.schemas import create_ceposit_schema
+from recharge.serializers import (
+    CurrencySerializer,
+    DepositTransactionSerializer,
+    UpdateDepositTransactionSerializer
+)
 from utils.paginations import SizePagePagination
 
 
@@ -24,20 +30,23 @@ class CreateDepositTransactionView(generics.ListCreateAPIView):
     ordering_fields = ["id", "-id", "created_at", "-created_at"]
     pagination_class = SizePagePagination
 
+    @swagger_auto_schema(**create_ceposit_schema)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
 
-class TransactionListByUserIDView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated]
-    queryset = Transaction.objects.filter(account__status="active")
-    serializer_class = DepositTransactionSerializer
-    lookup_url_kwarg = "user_id"
+class DetailUpdateDepostiTransactionView(generics.RetrieveUpdateAPIView):
+    queryset = Transaction.objects.filter(type="deposit", account__status="active")
+    serializer_class = UpdateDepositTransactionSerializer
+    lookup_field = "code"
+    allowed_methods = ["GET", "PUT"]
 
-    def get_queryset(self):
-        user_id = self.kwargs.get(self.lookup_url_kwarg)
-        queryset = super(TransactionListByUserIDView, self).get_queryset()
-        return queryset.filter(account__user_id=user_id)
+
+class DetailUpdateDepostiTransactionOriginCodeView(generics.RetrieveUpdateAPIView):
+    queryset = Transaction.objects.filter(type="deposit", account__status="active")
+    serializer_class = UpdateDepositTransactionSerializer
+    lookup_field = "code"
+    allowed_methods = ["GET", "PUT"]
 
 
 class CurrencyListClass(APIView):

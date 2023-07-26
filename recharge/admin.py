@@ -47,6 +47,8 @@ class TransactionAdmin(BaseAdmin):
         "created_by",
     ]
 
+    list_filter = ("created_at", "status", "currency_symbol", "merchant__code", "type")
+
     @admin.display(ordering="wallet__attributs__address_qr", description="QR")
     def get_qr(self, obj):
         addrs = obj.wallet.address
