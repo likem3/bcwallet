@@ -1,4 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import filters, generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -6,10 +7,11 @@ from rest_framework.views import APIView
 
 from apis.addrbank.currency import Currency
 from recharge.models import Transaction
+from recharge.schemas import create_ceposit_schema
 from recharge.serializers import (
     CurrencySerializer,
     DepositTransactionSerializer,
-    UpdateDepositTransactionSerializer,
+    UpdateDepositTransactionSerializer
 )
 from utils.paginations import SizePagePagination
 
@@ -28,6 +30,7 @@ class CreateDepositTransactionView(generics.ListCreateAPIView):
     ordering_fields = ["id", "-id", "created_at", "-created_at"]
     pagination_class = SizePagePagination
 
+    @swagger_auto_schema(**create_ceposit_schema)
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 

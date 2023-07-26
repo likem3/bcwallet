@@ -162,7 +162,7 @@ class Transaction(ExtraBaseModel):
         currency_symbol,
         currency_blockchain,
         currency_std,
-        callback_url,
+        callback_url=None,
         origin_code=None,
     ):
         query = {
@@ -189,6 +189,10 @@ class Transaction(ExtraBaseModel):
             "type": "deposit",
             "expired_at": (timezone.now() + timedelta(minutes=30)),
         }
+
+        if callback_url:
+            query["callback_url"] = callback_url
+
         if origin_code:
             query["origin_code"] = origin_code
 

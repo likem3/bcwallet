@@ -36,9 +36,6 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         decimal_places=10,
         help_text=app_settings.HELPER_TEXT["trx_amount"],
     )
-    callback_url = serializers.CharField(
-        help_text=app_settings.HELPER_TEXT["trx_callback_url"]
-    )
     merchant = MerchantSerializer(many=False, read_only=True)
     detail = serializers.SerializerMethodField()
 
@@ -71,6 +68,11 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
                 "origin_code",
             ]
         )
+        extra_kwargs = {
+            "callback_url": {
+                "required": False
+            }
+        }
 
     def validate(self, attrs):
         # Call the parent's validate() method first
@@ -78,8 +80,8 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
 
         user_id = attrs["user_id"]
         currency_id = attrs["currency_id"]
-        callback_url = attrs["callback_url"]
         merchant_code = attrs["merchant_code"]
+        callback_url = attrs.get("callback_url")
 
         if callback_url:
             validator = URLValidator()
@@ -168,7 +170,9 @@ class DepositTransactionSerializer(serializers.ModelSerializer):
         query["currency_symbol"] = self._wallet.currency_symbol
         query["currency_blockchain"] = self._wallet.currency_blockchain
         query["currency_std"] = self._wallet.currency_std
-        query["callback_url"] = validated_data["callback_url"]
+        if validated_data.get("callback_url"):
+            query["callback_url"] = validated_data["callback_url"]
+
         if validated_data.get("origin_code"):
             query["origin_code"] = validated_data["origin_code"]
 
