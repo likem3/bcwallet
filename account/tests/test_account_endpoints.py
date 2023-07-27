@@ -32,10 +32,11 @@ class AccountTestCase(TestSetup):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response_json["error"], "user_id: This field is required.")
 
-    def test_create_account_with_no_data_email(self):
+    def test_create_account_with_no_data_merchant_code(self):
         url = reverse("user-list-create")
         data = {
-            "user_id": 111,
+            "user_id": 1,
+            "email": "user1@mail.com",
             "username": "user1",
         }
         response = self.client.post(url, data=data)
@@ -43,24 +44,40 @@ class AccountTestCase(TestSetup):
         response_json = response.json()
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_json["error"], "email: This field is required.")
+        self.assertEqual(response_json["error"], "merchant_code: This field is required.")
 
-    def test_create_account_with_no_data_username(self):
+    def test_create_account_with_no_data_email(self):
         url = reverse("user-list-create")
         data = {
+            "merchant_code": self.merchant.code,
             "user_id": 111,
-            "email": "user1@mail.com",
+            "username": "user1",
         }
         response = self.client.post(url, data=data)
 
         response_json = response.json()
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response_json["error"], "username: This field is required.")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNotNone(response_json, "No response data")
+
+    def test_create_account_with_no_data_username(self):
+        url = reverse("user-list-create")
+        data = {
+            "merchant_code": self.merchant.code,
+            "user_id": 111,
+            "email": "user1@mail.com",
+        }
+        response = self.client.post(url, data=data)
+
+        response_json = response.json().get("data")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertIsNotNone(response_json, "No response data")
 
     def test_create_account_success(self):
         url = reverse("user-list-create")
         data = {
+            "merchant_code": self.merchant.code,
             "user_id": 111,
             "username": "user1",
             "email": "user1@mail.com",
@@ -69,7 +86,7 @@ class AccountTestCase(TestSetup):
         response_json = response.json()
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIsNotNone(response_json.get("data", None))
+        self.assertIsNotNone(response_json.get("data"), "No response data")
 
     def test_get_list_account_success(self):
         url = reverse("user-list-create")
@@ -80,7 +97,7 @@ class AccountTestCase(TestSetup):
 
     def test_get_list_account_not_empty_success(self):
         for user_id in [111, 112, 113]:
-            baker.make(Account, user_id=user_id, status="active")
+            baker.make(Account, merchant=self.merchant, user_id=user_id, status="active")
 
         url = reverse("user-list-create")
         response = self.client.get(url)
@@ -109,20 +126,30 @@ class AccountTestCase(TestSetup):
         self.assertEqual(len(response_data["results"]), 1)
         self.assertEqual(response_data["results"][0]["user_id"], 111)
 
-    def test_get_account_by_user_id_invalid(self):
-        account = baker.make(Account, user_id=111, status="active")
-        url = reverse("user-detail-suspend-by-id", args=[account.id + 100])
+    def test_get_account_by_merchant_code_user_id_invalid(self):
+        account = baker.make(Account, merchant=self.merchant, user_id=111, status="active")
+        url = reverse("user-detail-suspend-by-merchant_code-user_id", args=[self.merchant.code, account.id + 100])
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_account_by_account_id_valid(self):
-        account = baker.make(Account, user_id=111, status="active")
-        url = reverse("user-detail-suspend-by-id", args=[account.id])
+    def test_get_account_by_merchant_code_user_id_valid(self):
+        account = baker.make(Account, merchant=self.merchant, user_id=111, status="active")
+        url = reverse("user-detail-suspend-by-merchant_code-user_id", args=[self.merchant.code, account.user_id])
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["data"]["id"], account.id)
+
+    def test_suspend_account_by_merchant_code_user_id_valid(self):
+        account = baker.make(Account, merchant=self.merchant, user_id=111, status="active")
+        url = reverse("user-detail-suspend-by-merchant_code-user_id", args=[self.merchant.code, account.user_id])
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_suspend_account_by_account_id_valid(self):
         account = baker.make(Account, user_id=111, status="active")
@@ -136,25 +163,16 @@ class AccountTestCase(TestSetup):
 
     def test_get_account_by_account_id_invalid(self):
         account = baker.make(Account, user_id=111, status="active")
-        url = reverse("user-detail-suspend-by-user_id", args=[account.id + 100])
+        url = reverse("user-detail-suspend-by-id", args=[account.id + 100])
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
-    def test_get_account_by_user_id_valid(self):
+    def test_get_account_by_account_id_valid(self):
         account = baker.make(Account, user_id=111, status="active")
-        url = reverse("user-detail-suspend-by-user_id", args=[111])
+        url = reverse("user-detail-suspend-by-id", args=[account.id])
 
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json()["data"]["user_id"], account.user_id)
 
-    def test_suspend_account_by_user_id_valid(self):
-        account = baker.make(Account, user_id=111, status="active")
-        url = reverse("user-detail-suspend-by-user_id", args=[account.user_id])
-
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
-        response = self.client.delete(url)
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

@@ -26,6 +26,6 @@ urlpatterns = [
     path(
         "wallets/<int:merchant_code>/<int:user_id>/",
         WalletListByUserIDView.as_view(),
-        name="wallets-user-list",
+        name="wallets-merchant-user-list",
     ),
 ]

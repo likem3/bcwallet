@@ -92,14 +92,14 @@ class Currency:
     def get_currency(self, symbol):
         return self.currencies_response.get(symbol, {})
 
-    def get_address(self, symbol, user_id):
+    def get_address(self, symbol, merchant_code, user_id):
         currency = self.currencies_response.get(symbol, {})
         if currency:
             address = {
                 "currency_id": currency["id"],
                 "user_id": user_id,
                 "address": self.faker.sha256(),
-                "label": f"{currency['symbol']} - {user_id}",
+                "label": f"{merchant_code} - {currency['symbol']} - {user_id}",
                 "currency": self.currencies_response[symbol],
             }
             return address

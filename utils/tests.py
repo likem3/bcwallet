@@ -1,4 +1,6 @@
 from django.contrib.auth.models import User
+from merchant.models import Merchant
+from model_bakery import baker
 from rest_framework.test import APIClient, APITestCase
 
 
@@ -12,6 +14,8 @@ class TestSetup(APITestCase):
             password=self.admin_password,
             email=self.admin_email,
         )
+
+        self.merchant = baker.make(Merchant, status="active")
 
         return super().setUp()
 
