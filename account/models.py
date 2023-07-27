@@ -306,8 +306,13 @@ class WalletTask(BaseModel):
         ordering = ["-created_at"]
 
     @classmethod
+    @app_transaction.atomic()
     def create_task(cls, wallet, transaction_code):
-        cls.objects.create(
-            wallet=wallet,
-            transaction_code=transaction_code,
+        query = {"transaction_code": transaction_code}
+
+        task, created = cls.objects.update_or_create(
+            wallet=wallet, status="open",
+            defaults=query
         )
+
+        return task, created
