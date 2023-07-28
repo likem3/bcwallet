@@ -75,9 +75,9 @@ def get_update_wallet_balance_candidate():
             wallet_ids.append(wallet.id)
             wallet_tasks.append(WalletTask(wallet=wallet, status="open"))
 
-        wallet_task_in = WalletTask.objects.filter(wallet_id__in=wallet_ids)
-        if wallet_task_in:
-            wallet_task_in.update(status="cencel")
+        # wallet_task_in = WalletTask.objects.filter(wallet_id__in=wallet_ids)
+        # if wallet_task_in:
+        #     wallet_task_in.update(status="cencel")
 
         WalletTask.objects.bulk_create(wallet_tasks)
 
