@@ -1,7 +1,10 @@
 import json
+import random
 
 from django.conf import settings
 from faker import Faker
+from apis.handlers import BaseHandler
+from decimal import Decimal
 
 
 class Currency:
@@ -92,14 +95,14 @@ class Currency:
     def get_currency(self, symbol):
         return self.currencies_response.get(symbol, {})
 
-    def get_address(self, symbol, user_id):
+    def get_address(self, symbol, merchant_code, user_id):
         currency = self.currencies_response.get(symbol, {})
         if currency:
             address = {
                 "currency_id": currency["id"],
                 "user_id": user_id,
-                "address": self.faker.sha256(),
-                "label": f"{currency['symbol']} - {user_id}",
+                "address": self.faker.sha256().replace("0", ''),
+                "label": f"{merchant_code} - {currency['symbol']} - {user_id}",
                 "currency": self.currencies_response[symbol],
             }
             return address
@@ -118,3 +121,76 @@ class Currency:
                 ],
             }
         )
+
+
+class ResponseHandlerMock:
+    factors = {
+        "BTC": 100000000,
+        "DOGE": 100000000,
+        "LTC": 100000000,
+        "ETH": 10**18,
+        "TRX": 10**6,
+        "USDTTRC20": 1000000
+    }
+    responses = None
+
+    def __init__(self):
+        pass
+
+    def get_response(self, symbol, address):
+        if symbol == "BTC":
+            return self.get_btc_response()
+
+        elif symbol == "DOGE":
+            return self.get_doge_response()
+
+        elif symbol == "LTC":
+            return self.get_ltc_response()
+
+        elif symbol == "ETH":
+            return self.get_eth_response()
+
+        elif symbol == "TRX":
+            return self.get_trx_response()
+
+        elif symbol == "USDTTRC20":
+            return self.get_usdttrc20_response(address)
+
+    def get_btc_response(self):
+        return {"balance": self.generate_amount("BTC")}
+    
+    def get_doge_response(self):
+        return {"balance": self.generate_amount("DOGE")}
+    
+    def get_ltc_response(self):
+        return {"balance": self.generate_amount("LTC")}
+    
+    def get_eth_response(self):
+        return {"result": self.generate_amount("ETH", in_hex=True)}
+    
+    def get_trx_response(self):
+        return {"result": self.generate_amount("TRX", in_hex=True)}
+    
+    def get_usdttrc20_response(self, address):
+        return {
+            "data": [
+                {
+                    "trc20": [
+                        {
+                            "{}".format(address): self.generate_amount("USDTTRC20")
+                        }
+                    ]
+                }
+            ]
+        }
+
+    def generate_amount(self, symbol, in_hex=False):
+        pure_amount = Decimal(round(random.uniform(2.00, 3.00), 4))
+        factor = self.factors.get(symbol)
+
+        amount = int(pure_amount * factor)
+
+        if in_hex:
+            return hex(amount)
+
+        return amount
