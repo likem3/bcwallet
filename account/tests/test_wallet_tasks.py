@@ -1,13 +1,22 @@
+from datetime import timedelta
+from unittest.mock import patch
+
 from django.utils import timezone
 from faker import Faker
 from model_bakery import baker
 
-from account.models import Account, Wallet, WalletTask, WalletBalance
-from account.tasks import create_wallet_task, get_update_wallet_balance_candidate
-from account.tests.response_mock import Currency
+from account.models import Account, Wallet, WalletBalance, WalletTask
+from account.tasks import (
+    create_wallet_task,
+    get_update_wallet_balance_candidate,
+    update_wallet_balance
+)
+from account.tests.response_mock import Currency, ResponseHandlerMock
+from apis import Switcher
+from apis.handlers.bitcoin import BTCHandler
 from recharge.models import Transaction
 from utils.tests import TestSetup
-from datetime import timedelta
+import requests
 
 
 class WalletTaskTestCase(TestSetup):
@@ -99,6 +108,7 @@ class WalletTaskTestCase(TestSetup):
         )
 
         self.assertEqual(wallet_task.created_at, wallet_task1.created_at)
+        self.assertEqual(wallet_task.id, wallet_task1.id)
         self.assertEqual(wallet_task.status, "open")
         self.assertEqual(wallet_task1.status, "open")
 
@@ -127,3 +137,96 @@ class WalletTaskTestCase(TestSetup):
 
         self.assertEqual(wallet_task.created_at, wallet_task_after.created_at)
         self.assertEqual(wallet_task.status, wallet_task_after.status)
+
+
+class WalletTaskBalanceTestCase(TestSetup):
+    def setUp(self):
+        super().setUp()
+        self.autheticate()
+        self.account = baker.make(Account, user_id=111, status="active")
+        self.faker = Faker()
+        self.currency = Currency()
+
+    def create_wallet(self, symbol):
+        address_obj = self.currency.get_address(symbol, merchant_code=self.merchant.code, user_id=self.account.user_id)
+        wallet = baker.make(
+            Wallet,
+            merchant=self.merchant,
+            account=self.account,
+            user_id=self.account.user_id,
+            currency_id=self.currency.get_currency(symbol)["id"],
+            currency_symbol=symbol,
+            address=address_obj.get("address"),
+            currency_std=None,
+            network="mainnet",
+            status="active",
+        )
+
+        return wallet
+
+    @patch.object(requests, "get")
+    def _update_wallet_balance(self, symbol, get_balance_mock):
+        wallet = self.create_wallet(symbol)
+        half_hour_ago = timezone.now() - timedelta(minutes=30)
+        wallet_balance = baker.make(
+            WalletBalance,
+            wallet=wallet,
+            amount=1,
+        )
+        wallet_balance.created_at = half_hour_ago
+        wallet_balance.save()
+
+        get_update_wallet_balance_candidate()
+        handler = ResponseHandlerMock()
+        get_balance_mock.return_value.json.return_value = handler.get_response(symbol, address=wallet.address)
+
+        update_wallet_balance()
+
+        wallet_task = WalletTask.objects.get(
+            wallet=wallet
+        )
+
+        self.assertEqual(wallet_task.status, "success")
+
+    @patch.object(requests, "post")
+    def __update_wallet_balance(self, symbol, get_balance_mock):
+        wallet = self.create_wallet(symbol)
+        half_hour_ago = timezone.now() - timedelta(minutes=30)
+        wallet_balance = baker.make(
+            WalletBalance,
+            wallet=wallet,
+            amount=1,
+        )
+        wallet_balance.created_at = half_hour_ago
+        wallet_balance.save()
+
+        get_update_wallet_balance_candidate()
+
+        handler = ResponseHandlerMock()
+        get_balance_mock.return_value.json.return_value = handler.get_response(symbol, address=wallet.address)
+
+        update_wallet_balance()
+
+        wallet_task = WalletTask.objects.get(
+            wallet=wallet
+        )
+
+        self.assertEqual(wallet_task.status, "success")
+
+    # def test_update_wallet_balance_btc(self):
+    #     self._update_wallet_balance("BTC")
+
+    # def test_update_wallet_balance_doge(self):
+    #     self._update_wallet_balance("DOGE")
+
+    # def test_update_wallet_balance_ltc(self):
+    #     self._update_wallet_balance("LTC")
+
+    # def test_update_wallet_balance_eth(self):
+    #     self.__update_wallet_balance("ETH")
+
+    def test_update_wallet_balance_trx(self):
+        self.__update_wallet_balance("TRX")
+
+    # def test_update_wallet_balance_usdttrc20(self):
+    #     self._update_wallet_balance("USDTTRC20")
