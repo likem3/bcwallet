@@ -24,6 +24,11 @@ class AccountSerializer(serializers.ModelSerializer):
         read_only_fields = model.get_fields(
             excludes=["user_id", "email", "username", "merchant_code"]
         )
+        extra_kwargs = {
+            "merchant_code": {
+                "required": True
+            }
+        }
 
     def update(self, instance, validated_data):
         # Disable updating the user_id field
