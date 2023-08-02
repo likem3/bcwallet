@@ -1,5 +1,4 @@
 CELERY_BROKER_URL = 'redis://localhost/0'
-# CELERY_RESULT_BACKEND = 'redis://172.17.0.2:6379/0'
 
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers.DatabaseScheduler'
 
