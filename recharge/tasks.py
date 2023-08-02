@@ -8,7 +8,7 @@ from requests.exceptions import HTTPError
 
 from account.models import Wallet, WalletTask
 from recharge.models import Transaction
-from utils.handlers import get_transaction_notif_url
+from utils.handlers import generate_notification_request_data
 
 
 @shared_task
@@ -40,9 +40,9 @@ def update_transactions_status_success(transactions_data={}):
             balance_in = transactions_data.get(trx.code, 0)
             if balance_in and Decimal(balance_in) >= Decimal(trx.amount):
                 trx.status = "completed"
-                url = get_transaction_notif_url(trx=trx, status="completed")
-                if url:
-                    execute_callback_url_transaction.delay(url)
+                if trx.callback_url:
+                    notif_data = generate_notification_request_data(trx=trx, status="completed")
+                    execute_callback_url_transaction.delay(url=trx.callback_url, data=notif_data)
 
                 trx_update_data.append(trx)
                 trx_ids_updated.append({trx.code: balance_in})
@@ -61,9 +61,9 @@ def update_transaction_status_failed():
     trxs = Transaction.objects.filter(expired_at__lt=threshold, status="pending")
     if trxs:
         for trx in trxs:
-            url = get_transaction_notif_url(trx=trx, status="failed")
-            if url:
-                execute_callback_url_transaction.delay(url=url)
+            if trx.callback_url:
+                notif_data = generate_notification_request_data(trx=trx, status="failed")
+                execute_callback_url_transaction.delay(url=trx.callback_url, data=notif_data)
 
         trxs.update(status="failed")
 
@@ -71,11 +71,11 @@ def update_transaction_status_failed():
 
 
 @shared_task
-def execute_callback_url_transaction(url=None):
+def execute_callback_url_transaction(url=None, data={}):
     result = {"url": url}
     if url:
         try:
-            response = requests.get(url, timeout=1)
+            response = requests.post(url, timeout=1, data=data)
 
             if response.status_code in [200, 201]:
                 result["status"] = "success"

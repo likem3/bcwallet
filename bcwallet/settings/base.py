@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'rest_framework',
+    'rest_framework.authtoken',
     'drf_yasg',
     'drf_standardized_errors',
     'django_filters',
@@ -108,6 +109,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'storages')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'EXCEPTION_HANDLER': 'drf_standardized_errors.handler.exception_handler',

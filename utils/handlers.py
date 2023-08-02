@@ -1,33 +1,29 @@
 import base64
+import hashlib
 import os
+import json
 import uuid
 from datetime import datetime
 from decimal import Decimal
 from io import BytesIO
-from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
+from urllib.parse import parse_qs, urlencode, urlparse, urlunparse, urlencode
 
 import qrcode
 from django.utils import timezone
+from django.conf import settings as app_settings
 from PIL import Image
-
-from bcwallet.settings import (
-    BASE_DIR,
-    BLOCKCHAIN_MINIMUM_DEPOSIT_MAP,
-    BLOCKCHAIN_NETWORK_MAP,
-    ENVIRONMENT_SETTING,
-)
 
 
 def handle_blockchain_network(blockchain):
-    if ENVIRONMENT_SETTING == "production":
-        return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["production"]
-    return blockchain, BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
+    if app_settings.ENVIRONMENT_SETTING == "production":
+        return blockchain, app_settings.BLOCKCHAIN_NETWORK_MAP[blockchain]["production"]
+    return blockchain, app_settings.BLOCKCHAIN_NETWORK_MAP[blockchain]["development"]
 
 
 def handle_minimum_deposit_amount(symbol):
-    if ENVIRONMENT_SETTING == "production":
-        return BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]
-    return Decimal(BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]) / 10
+    if app_settings.ENVIRONMENT_SETTING == "production":
+        return app_settings.BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]
+    return Decimal(app_settings.BLOCKCHAIN_MINIMUM_DEPOSIT_MAP[symbol]) / 10
 
 
 def handle_transaction_code(symbol, user_id, trx_type="DP", merchant_code=None):
@@ -55,7 +51,7 @@ def generate_qrcode_with_logo(text, logo_path="/icons/default.png"):
 
     # Load the logo from base64
     # logo_full_path = os.path.join(settings.BASE_DIR, logo_path)
-    logo_full_path = os.path.join(BASE_DIR, logo_path[1:])
+    logo_full_path = os.path.join(app_settings.BASE_DIR, logo_path[1:])
     logo_image = Image.open(logo_full_path)
 
     # Resize the logo to 20% of the QR code size
@@ -103,6 +99,31 @@ def handle_url_parameter(url, new_parems={}):
     )
 
     return updated_url
+
+
+def generate_notification_request_data(trx, status=None):
+    query = {
+        "user_id": trx.user_id,
+        "merchant_code": trx.merchant.code,
+        "trx_status": status if status else trx.status,
+        "trx_code": trx.code,
+        "trx_created_at": handle_created_at(utc_time=trx.created_at),
+        "trx_amount": trx.amount,
+    }
+    if trx.origin_code:
+        query["origin_code"] = trx.origin_code
+
+    ordered_query = dict(sorted(query.items()))
+    params_str = urlencode(ordered_query)
+
+    keys = app_settings.FRONTEND_NOTIFICATION_KEYS
+
+    plain_test = f'{params_str}&keys={keys}'
+    signature = hashlib.md5(plain_test.encode('utf-8')).hexdigest()
+
+    query['signature'] = signature
+
+    return query
 
 
 def get_transaction_notif_url(trx, status=None):
