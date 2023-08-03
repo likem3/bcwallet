@@ -1,9 +1,14 @@
+import logging
 from decimal import Decimal
 
 import requests
 from django.conf import settings as app_settings
 
 from apis.handlers import BaseHandler
+from utils.handlers import handle_log_request_data
+
+
+logger = logging.getLogger('request')
 
 
 class USDTTRC20Handler(BaseHandler):
@@ -13,6 +18,7 @@ class USDTTRC20Handler(BaseHandler):
         self.url_test = app_settings.TRONGRID_USDT_ADDR_TEST
 
     def parsing_balance(self, address, response, contract_address):
+        log_data = handle_log_request_data(response)
         try:
             resp_json = response.json()
             if not resp_json:
@@ -30,10 +36,12 @@ class USDTTRC20Handler(BaseHandler):
             trc20_obj = {k: v for item in trc_objs for k, v in item.items()}
             balance = trc20_obj.get(contract_address, "0")
 
+            logger.info(msg='Success get usdt trc20 balance', extra=log_data)
             return Decimal(balance) / 1000000
 
         except Exception as e:
-            print(str(e))
+            log_data['Exception'] = str(e)
+            logger.error(msg='Error get usdt trc20 balance', extra=log_data)
             return
 
     def get_balance(self, address):
