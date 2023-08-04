@@ -1,8 +1,13 @@
+import logging
+
 import requests
 from django.conf import settings as app_settings
 from jsonrpcclient import request
 
 from apis.handlers import BaseHandler
+from utils.handlers import handle_log_request_data
+
+logger = logging.getLogger('request')
 
 
 class EthHandler(BaseHandler):
@@ -15,6 +20,7 @@ class EthHandler(BaseHandler):
         self.request_id = "getblock.io"
 
     def parsing_balance(self, response):
+        log_data = handle_log_request_data(response)
         try:
             json_response = response.json()
             amount_hex = json_response.get("result")
@@ -22,9 +28,11 @@ class EthHandler(BaseHandler):
             decimal_value = int(amount_hex, 16)
             eth_value = decimal_value / 10**18
 
+            logger.info(msg='Success get ethereum balance', extra=log_data)
             return eth_value
         except Exception as e:
-            print(str(e))
+            log_data['Exception'] = str(e)
+            logger.error(msg='Error get ethereum balance', extra=log_data)
             return
 
     def get_balance(self, address):

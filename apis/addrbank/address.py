@@ -1,6 +1,10 @@
+import logging
 import requests
 
 from apis.addrbank import BaseAddrBank
+from utils.handlers import handle_log_request_data
+
+logger = logging.getLogger('request')
 
 
 class Address(BaseAddrBank):
@@ -21,8 +25,14 @@ class Address(BaseAddrBank):
             "user_id": user_id,
         }
         api_response = requests.post(url=url, data=data)
+
+        log_data = handle_log_request_data(api_response)
+
         if api_response.status_code not in [200, 201]:
+            logger.error(msg='Error request address', extra=log_data)
             return
+
+        logger.info(msg='Success request address', extra=log_data)
 
         return api_response.json()
 
@@ -36,6 +46,7 @@ class Address(BaseAddrBank):
             json_response = self.get_assign_address(merchant_code, currency_id, user_id)
 
             if not json_response:
+                logger.error(msg='create_address json_response empty')
                 return
 
             self._address = json_response["address"]
@@ -47,11 +58,11 @@ class Address(BaseAddrBank):
             self._json = {"status": True, "result": json_response}
 
         except Exception as e:
-            print(str(e))
             self._json = {
                 "status": False,
                 "result": "generate_deposit_address: %s\n" % str(e),
             }
+            logger.error(msg='Error request address', extra=self._json)
 
     def create_fake_address(self, currency_id, user_id):
         import random

@@ -12,6 +12,7 @@ import qrcode
 from django.utils import timezone
 from django.conf import settings as app_settings
 from PIL import Image
+from requests import Response
 
 
 def handle_blockchain_network(blockchain):
@@ -142,3 +143,16 @@ def get_transaction_notif_url(trx, status=None):
         return handle_url_parameter(url=trx.callback_url, new_parems=query)
 
     return
+
+
+def handle_log_request_data(response: Response):
+    body_str = response.request.body.decode('utf-8') if response.request.body else None
+    body = json.loads(body_str) if body_str else None
+
+    return {
+        'url': response.request.url,
+        'request_data': body,
+        'method': response.request.method,
+        'response_status_code': response.status_code,
+        'response_data': response.json()
+    }

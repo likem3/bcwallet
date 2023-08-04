@@ -42,7 +42,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'utils.timezones.TimezoneMiddleware'
+    'utils.timezones.TimezoneMiddleware',
+    'utils.middlewares.RequestObserverMiddleware',
 ]
 
 ROOT_URLCONF = 'bcwallet.urls'
