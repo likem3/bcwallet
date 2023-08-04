@@ -25,8 +25,8 @@ class CreateDepositTransactionView(generics.ListCreateAPIView):
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_fields = ["code", "user_id", "status", "type"]
-    search_fields = ["code", "user_id", "status", "type"]
+    filterset_fields = ["code", "status", "type"]
+    search_fields = ["code", "status", "type"]
     ordering_fields = ["id", "-id", "created_at", "-created_at"]
     pagination_class = SizePagePagination
 
@@ -45,7 +45,7 @@ class DetailUpdateDepostiTransactionView(generics.RetrieveUpdateAPIView):
 class DetailUpdateDepostiTransactionOriginCodeView(generics.RetrieveUpdateAPIView):
     queryset = Transaction.objects.filter(type="deposit", account__status="active")
     serializer_class = UpdateDepositTransactionSerializer
-    lookup_field = "code"
+    lookup_field = "origin_code"
     allowed_methods = ["GET", "PUT"]
 
 

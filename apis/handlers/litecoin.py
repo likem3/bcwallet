@@ -1,9 +1,13 @@
+import logging
 from decimal import Decimal
 
 import requests
 from django.conf import settings as app_settings
 
 from apis.handlers import BaseHandler
+from utils.handlers import handle_log_request_data
+
+logger = logging.getLogger('request')
 
 
 class LTCHandler(BaseHandler):
@@ -13,13 +17,16 @@ class LTCHandler(BaseHandler):
         self.url_test = app_settings.GETBLOCK_LITECOIN_BLOCKBOOK_ADDR_TEST
 
     def parsing_balance(self, response):
+        log_data = handle_log_request_data(response)
         try:
             resp_json = response.json()
             balance_sts = Decimal(resp_json["balance"])
+            logger.info(msg='Success get lite coin balance', extra=log_data)
             return balance_sts / 100000000
 
         except Exception as e:
-            print(str(e))
+            log_data['Exception'] = str(e)
+            logger.error(msg='Error get lite coin balance', extra=log_data)
             return
 
     def get_balance(self, address):
