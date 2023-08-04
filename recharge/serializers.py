@@ -238,4 +238,8 @@ class CurrencySerializer(serializers.Serializer):
     symbol = serializers.CharField()
     blockchain = serializers.CharField()
     std = serializers.CharField()
+    minimum_deposit = serializers.SerializerMethodField()
     network = NetworkSerializer()
+
+    def get_minimum_deposit(self, obj):
+        return str(handle_minimum_deposit_amount(obj.get('symbol')))
