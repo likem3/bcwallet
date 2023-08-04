@@ -7,6 +7,9 @@ LOGGING = {
         },
         'json': {
             '()': 'json_log_formatter.JSONFormatter'
+        },
+        'json_verbose': {
+            '()': 'json_log_formatter.VerboseJSONFormatter'
         }
     },
     'handlers': {
@@ -33,6 +36,14 @@ LOGGING = {
             'backupCount': 5,
             'formatter': 'json',
         },
+        'task': {
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/task.log',
+            'encoding': 'utf-8',
+            'maxBytes': 1024 * 1024 * 5,
+            'backupCount': 5,
+            'formatter': 'json_verbose',
+        },
     },
     'loggers': {
         '': {
@@ -47,6 +58,11 @@ LOGGING = {
         },
         'request': {
             'handlers': ['request'],
+            'propagate': False,
+            'level': 'INFO',
+        },
+        'task': {
+            'handlers': ['task'],
             'propagate': False,
             'level': 'INFO',
         }

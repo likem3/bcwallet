@@ -11,6 +11,10 @@ from account.models import Wallet, WalletBalance, WalletTask
 from apis import Switcher
 from recharge.models import Transaction
 from recharge.tasks import update_transactions_status_success
+import logging
+
+
+logger = logging.getLogger('task')
 
 
 @shared_task
@@ -24,12 +28,14 @@ def create_wallet_task(transaction_code):
         )
 
     except Transaction.DoesNotExist:
-        print(f"{transaction_code} is invalid")
-        return {"status": "failed", "msg": f"{transaction_code} is invalid"}
+        error_data = {"status": "failed", "error_msg": f"{transaction_code} is invalid"}
+        logger.error(msg='Error create wallet task', extra=error_data)
+        return error_data
 
     except Exception as e:
-        print(str(e))
-        return {"status": "failed", "msg": str(e)}
+        error_data = {"status": "failed", "error_msg": str(e)}
+        logger.error(msg='Error create wallet task', extra=error_data)
+        return error_data
 
 
 @shared_task
@@ -75,10 +81,6 @@ def get_update_wallet_balance_candidate():
             wallet_ids.append(wallet.id)
             wallet_tasks.append(WalletTask(wallet=wallet, status="open"))
 
-        # wallet_task_in = WalletTask.objects.filter(wallet_id__in=wallet_ids)
-        # if wallet_task_in:
-        #     wallet_task_in.update(status="cencel")
-
         WalletTask.objects.bulk_create(wallet_tasks)
 
         return {
@@ -86,7 +88,8 @@ def get_update_wallet_balance_candidate():
         }
 
     except Exception as e:
-        print(str(e))
+        error_data = {'status': False, 'error_msg': str(e)}
+        logger.error(msg='Failed get update wallet balance candidate', extra=error_data)
 
 
 @shared_task
@@ -101,6 +104,8 @@ def update_wallet_balance():
     transactions_candidate = {}
     balance_update_created_at = []
     new_balance_objs = []
+
+    log_data = {}
 
     for candidate in candidates:
         affected_wallet_id.append(candidate.wallet.id)
@@ -129,19 +134,23 @@ def update_wallet_balance():
                 balance = handler.get_balance_test(address)
 
             if balance is None:
-                raise Exception("Invalid fetch wallet balance")
+                raise Exception("Invalid fetch wallet balance, balance None")
 
         except Exception as e:
             if not candidate.transaction_code:
                 candidate.attemp += 1
                 candidate.status = "fail" if candidate.attemp >= 3 else "open"
                 task_update.append(candidate)
-            print(str(e))
+            else:
+                log_data[address] = {
+                    "status": False,
+                    "error_msg": str(e)
+                }
+
             continue
 
         balance = round(Decimal(balance), 10)
 
-        print(f"lb: {last_balance_amount}\nbn:{balance}")
         if last_balance_amount == balance:
             if not candidate.transaction_code and balance is not None:
                 candidate.status = "cancel"
@@ -184,6 +193,9 @@ def update_wallet_balance():
             transactions_candidate[candidate.transaction_code] = query["amount_change"]
 
         success_task_id.append(candidate.id)
+    
+    if log_data:
+        logger.warning(msg='Update balance task get balance', extra=log_data)
 
     try:
         if task_update:
@@ -215,5 +227,6 @@ def update_wallet_balance():
             "transactions_candidate": transactions_candidate,
         }
     except Exception as e:
-        print(str(e))
-        return {"status": "task_failed"}
+        log_data = {"status": False, "error_msg": str(e)}
+        logger.error(msg='Error update_wallet_balance', extra=log_data)
+        return log_data

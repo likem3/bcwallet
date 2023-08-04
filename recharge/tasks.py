@@ -9,6 +9,10 @@ from requests.exceptions import HTTPError
 from account.models import Wallet, WalletTask
 from recharge.models import Transaction
 from utils.handlers import generate_notification_request_data
+import logging
+
+
+logger = logging.getLogger('task')
 
 
 @shared_task
@@ -72,7 +76,7 @@ def update_transaction_status_failed():
 
 @shared_task
 def execute_callback_url_transaction(url=None, data={}):
-    result = {"url": url}
+    result = {"url": url, "data":data}
     if url:
         try:
             response = requests.post(url, timeout=1, data=data)
@@ -93,4 +97,5 @@ def execute_callback_url_transaction(url=None, data={}):
             result["status"] = "failed"
             result["message"] = str(err)
 
+    logger.warning(msg='execute post callback_url', extra=result)
     return result

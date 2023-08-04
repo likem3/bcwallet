@@ -18,7 +18,7 @@ class Currency(BaseAddrBank):
 
             response_json = api_response.json()
 
-            log_data = handle_log_request_data(response_json)
+            log_data = handle_log_request_data(api_response)
 
             if api_response.status_code != 200:
                 logger.error(msg='Error request get currency', extra=log_data)
