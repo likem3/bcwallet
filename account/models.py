@@ -51,7 +51,7 @@ class Account(BaseModel):
     )
 
     def __str__(self):
-        return f"{str(self.merchant.code)} - {str(self.user_id)}"
+        return f"{str(self.merchant.code) if self.merchant else None} - {str(self.user_id)}"
 
     class Meta:
         db_table = "account_accounts"

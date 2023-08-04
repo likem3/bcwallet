@@ -7,6 +7,7 @@ from utils.admins import BaseAdmin, admin
 class AccountAdmin(BaseAdmin):
     list_display = [
         "uuid",
+        "merchant_code",
         "user_id",
         "email",
         "username",
@@ -16,6 +17,11 @@ class AccountAdmin(BaseAdmin):
     search_fields = ("user_id", "email", "username")
 
     list_filter  = ("created_at", "status", "merchant__code")
+
+    def merchant_code(self, obj):
+        if obj.merchant:
+            return obj.merchant.code
+        return
 
 
 class WalletAdmin(BaseAdmin):
